@@ -1,0 +1,597 @@
+\documentclass[11pt,a4paper]{article}
+
+% ── Fonts (XeLaTeX) ──────────────────────────────────────────────────────────
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{Latin Modern Mono}
+
+% ── Layout ────────────────────────────────────────────────────────────────────
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{parskip}
+
+% ── Math and symbols ─────────────────────────────────────────────────────────
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{stmaryrd}       % ⟦ ⟧ brackets
+
+% ── Tables, figures, code ────────────────────────────────────────────────────
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{float}
+
+% ── Hyperlinks ────────────────────────────────────────────────────────────────
+\usepackage[hidelinks,bookmarksnumbered]{hyperref}
+\usepackage{url}
+
+% ── Bibliography ──────────────────────────────────────────────────────────────
+\usepackage[numbers,sort&compress]{natbib}
+\bibliographystyle{plainnat}
+
+% ── Theorem environments ──────────────────────────────────────────────────────
+\newtheorem{definition}{Definition}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}{Proposition}[section]
+
+% ── Code listing style ────────────────────────────────────────────────────────
+\definecolor{codebg}{rgb}{0.97,0.97,0.97}
+\definecolor{codekey}{rgb}{0.0,0.3,0.6}
+\definecolor{codecomment}{rgb}{0.4,0.4,0.4}
+\definecolor{codestring}{rgb}{0.6,0.1,0.1}
+
+\lstdefinelanguage{praxis}{
+  keywords={type, channel, station, resource, arrival, process, let, in, if,
+            then, else, match, rec, prompt, compute, human, acquire, release,
+            assert, delay, pchoice, monitor, when, skip, stop, nu, servers,
+            discipline, fifo, yield, rework, wip, limit, service_time,
+            schedule, sla, escalate, batch},
+  sensitive=true,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  keywordstyle=\color{codekey}\bfseries,
+  commentstyle=\color{codecomment}\itshape,
+  stringstyle=\color{codestring},
+  basicstyle=\small\ttfamily,
+  backgroundcolor=\color{codebg},
+  frame=single,
+  framerule=0.4pt,
+  rulecolor=\color{black!20},
+  xleftmargin=1em,
+  xrightmargin=1em,
+  breaklines=true,
+  columns=fullflexible,
+  showstringspaces=false,
+  tabsize=2,
+}
+\lstset{language=praxis}
+
+% ── Macros ────────────────────────────────────────────────────────────────────
+\newcommand{\praxis}{\textsc{Praxis}}
+\newcommand{\sem}[1]{\llbracket #1 \rrbracket}
+\newcommand{\qext}[1]{\mathcal{Q}(#1)}
+\newcommand{\scv}{c^2}
+\newcommand{\Nat}{\mathbb{N}}
+\newcommand{\Real}{\mathbb{R}}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\title{%
+  \vspace{-1cm}
+  \textbf{\praxis: Process Algebra for eXtensible Industrial Systems}\\[6pt]
+  \large A Formal Specification Language for Prompt-Based Production Systems\\
+  with Dual Petri Net and Queueing Semantics
+}
+
+\author{%
+  \textsc{The Praxis Project}
+}
+
+\date{February 2026 \quad---\quad Version 0.1.0 (Draft)}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+% ── Abstract ──────────────────────────────────────────────────────────────────
+\begin{abstract}
+We introduce \praxis{} (\textbf{P}rocess \textbf{A}lgebra for e\textbf{X}tensible \textbf{I}ndustrial \textbf{S}ystems), a formal specification language for describing production systems in which workstations are LLM-based agents, deterministic computations, or human task queues, and jobs are software artifacts flowing through a queueing network.
+\praxis{} provides a unified formal model: every program has both a \emph{control-flow} interpretation via Coloured Generalized Stochastic Petri Nets~\cite{marsan1995modelling,jensen2009coloured} and a \emph{performance} interpretation via queueing network extraction~\cite{bolch2006queueing}.
+The language inherits compositional reasoning from CSP~\cite{hoare1985communicating} and the $\pi$-calculus~\cite{milner1999communicating}, while its performance semantics draws on Jackson networks~\cite{jackson1957networks}, the BCMP theorem~\cite{baskett1975open}, and the VUT equation from Factory Physics~\cite{hopp2011factory}.
+We present the complete abstract syntax, type system, operational semantics, dual denotational translations, well-formedness conditions, and three worked examples drawn from the software lifecycle.
+\end{abstract}
+
+\vspace{0.5cm}
+\tableofcontents
+\newpage
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Introduction}
+\label{sec:intro}
+
+Modern distributed software systems are \emph{production systems} in the Operations Research and Industrial Engineering (ORIE) sense.
+Artifacts---code commits, pull requests, test reports, deployment manifests, incident tickets---flow through a network of workstations (development, review, testing, deployment, monitoring), are transformed by servers (human engineers, automated tools, LLM-based agents), experience congestion and variability, and must meet throughput and cycle-time targets.
+
+Yet the tools used to specify, analyze, and orchestrate these systems lack the formal foundation that manufacturing and logistics have enjoyed for decades.
+Agent orchestration frameworks describe \emph{what} to do but not \emph{how fast} or \emph{how reliably}.
+Workflow engines capture sequencing but ignore queueing effects.
+DevOps pipelines are operationally concrete but analytically opaque.
+
+\praxis{} bridges this gap.  It is a formal specification language for compiling high-level descriptions of productive processes into graphs of prompt-based processes for developing, deploying, monitoring, and maintaining distributed software systems.  Crucially, \praxis{} is \emph{not} a generic agent orchestration DSL.  It is a \textbf{production system specification language} grounded in ORIE, where:
+\begin{itemize}
+  \item \textbf{Workstations} are prompt-based LLM agents, deterministic compute steps, or human task queues.
+  \item \textbf{Jobs} are software artifacts.
+  \item \textbf{The graph} is a queueing network with formal performance semantics.
+\end{itemize}
+
+\subsection{Design Principles}
+
+\praxis{} rests on five principles:
+
+\begin{enumerate}
+  \item \textbf{Dual semantics by construction.}
+    Every \praxis{} program has both a control-flow interpretation (what can happen) via Coloured Generalized Stochastic Petri Nets~\cite{marsan1995modelling}, and a performance interpretation (how fast it happens) via queueing network extraction.
+    These are not separate models glued together; they arise from a single unified formal model.
+
+  \item \textbf{Stochastic from day one.}
+    Variability is not an afterthought.
+    Arrival processes, service times, yield rates, and routing probabilities are first-class language constructs with distribution types.
+    The Squared Coefficient of Variation ($\scv = \mathrm{Var}/\mathrm{Mean}^2$) links the language's stochastic specifications directly to queueing performance via the VUT equation~\cite{hopp2011factory,kingman1961single}.
+
+  \item \textbf{Process-algebraic composition.}
+    \praxis{} inherits the compositional reasoning power of CSP~\cite{hoare1985communicating,roscoe1997theory} and the $\pi$-calculus~\cite{milner1992calculus,milner1999communicating,sangiorgi2001pi}.
+    Systems are built from primitive processes using sequential, parallel, choice, restriction, and replication operators.
+    Every operator has a precise Petri net translation and queueing interpretation.
+
+  \item \textbf{ORIE-native abstractions.}
+    The language provides first-class constructs for Factory Physics~\cite{hopp2011factory} concepts: stations with service disciplines, finite resources (WIP caps, Kanban), arrival processes, routing policies, batch processing, rework loops, and performance assertions.
+
+  \item \textbf{Specification, not implementation.}
+    \praxis{} defines syntax, type system, and formal semantics.
+    Conforming implementations may target simulation, analytical solvers, model checkers, or direct execution.
+\end{enumerate}
+
+\subsection{Contributions}
+
+This paper presents:
+\begin{enumerate}
+  \item A complete abstract syntax (EBNF grammar) for a process algebra enriched with ORIE primitives (Section~\ref{sec:syntax}).
+  \item A type system with kinds, distribution types, resource environments, and dimensional types (Section~\ref{sec:types}).
+  \item Structural operational semantics in the style of Plotkin~\cite{plotkin1981structural} with stochastic extensions (Section~\ref{sec:opsem}).
+  \item A translation $\sem{\cdot}$ to Coloured Generalized Stochastic Petri Nets~\cite{murata1989petri,jensen1987coloured} with a behavioral equivalence theorem (Section~\ref{sec:petri}).
+  \item A queueing model extraction function $\qext{\cdot}$ supporting Jackson~\cite{jackson1957networks}, BCMP~\cite{baskett1975open}, and GI/G/c approximations (Section~\ref{sec:queueing}).
+  \item Eight well-formedness conditions bridging type safety, structural analysis, and performance analysis (Section~\ref{sec:wellformed}).
+  \item Three worked examples from the software lifecycle (Section~\ref{sec:examples}).
+\end{enumerate}
+
+\subsection{Paper Organization}
+
+Section~\ref{sec:background} reviews the formal foundations.
+Section~\ref{sec:syntax} presents the abstract syntax.
+Section~\ref{sec:types} defines the type system.
+Section~\ref{sec:opsem} gives the operational semantics.
+Section~\ref{sec:petri} defines the Petri net translation.
+Section~\ref{sec:queueing} describes the queueing extraction.
+Section~\ref{sec:wellformed} states the well-formedness conditions.
+Section~\ref{sec:examples} presents worked examples.
+Section~\ref{sec:related} discusses related work, and Section~\ref{sec:conclusion} concludes.
+The full specification (12 chapters, ${\sim}4{,}600$ lines) accompanies this paper.
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Background and Foundations}
+\label{sec:background}
+
+\subsection{Process Algebra}
+
+\praxis{} draws on two traditions of process algebra.
+
+\textbf{CSP} (Communicating Sequential Processes)~\cite{hoare1985communicating,roscoe1997theory} provides the alphabetized model of synchronization, external and internal choice operators, and the trace/failures/divergences semantic hierarchy.
+A CSP process communicates with its environment through named events; parallel composition synchronizes on shared alphabets.
+
+The \textbf{$\pi$-calculus}~\cite{milner1992calculus,milner1999communicating,sangiorgi2001pi} extends this with \emph{name mobility}: channels are first-class values that can be communicated over other channels.
+The restriction operator $(\nu\, a)P$ creates fresh private channels, and replication $!P$ models persistent servers.
+\praxis{} adopts typed channels from the $\pi$-calculus with asymmetric send/receive, and restriction for scope control.
+
+\subsection{Petri Nets}
+
+Petri nets~\cite{petri1962kommunikation,murata1989petri,reisig2013understanding} are a classical model for concurrent and distributed systems.
+A Petri net $(P, T, F, W, M_0)$ consists of places $P$, transitions $T$, a flow relation $F$, arc weights $W$, and an initial marking $M_0$.
+The theory provides powerful structural analysis: \emph{P-invariants} for conservation, \emph{T-invariants} for repeatability, \emph{siphons} and \emph{traps} for deadlock analysis.
+
+\praxis{} targets \emph{Coloured Generalized Stochastic Petri Nets} (CGSPNs)~\cite{marsan1995modelling,jensen2009coloured}, which extend the basic model with token colors (types), guards, arc expressions, and stochastic firing delays.
+Channels map to places, stations map to transition subnets, and composition operators map to net composition operations.
+
+\subsection{Queueing Theory}
+
+The queueing-theoretic grounding of \praxis{} draws on four pillars:
+
+\textbf{Jackson networks}~\cite{jackson1957networks}: Open networks of $M/M/c$ queues with Poisson arrivals and exponential service admit product-form steady-state solutions, enabling efficient analytical computation.
+
+\textbf{The BCMP theorem}~\cite{baskett1975open}: Generalizes product-form results to four server types (FCFS with exponential service, processor sharing, infinite server, LCFS-PR) with multiple job classes and state-dependent routing.
+
+\textbf{Little's Law}~\cite{little1961proof,little2011little}: The universal invariant $L = \lambda W$ relating average number in system, throughput, and average sojourn time.
+It holds for \emph{any} stable system regardless of distributional assumptions.
+
+\textbf{The VUT equation}~\cite{hopp2011factory,kingman1961single}: For a GI/G/c queue, the expected waiting time in queue is approximately:
+\begin{equation}\label{eq:vut}
+  W_q \;\approx\; \underbrace{\left(\frac{\scv_a + \scv_s}{2}\right)}_{\text{Variability}} \;\cdot\; \underbrace{\frac{\rho^{\sqrt{2(c+1)}}}{1 - \rho}}_{\text{Utilization}} \;\cdot\; \underbrace{E[S]}_{\text{Time}}
+\end{equation}
+where $\scv_a$ and $\scv_s$ are the squared coefficients of variation of inter-arrival and service times, $\rho = \lambda/(c\mu)$ is utilization, and $E[S]$ is mean service time.
+This connects distribution parameters directly to performance, which is why \praxis{} makes distributions first-class.
+
+\subsection{Factory Physics}
+
+The ORIE grounding draws on the laws of Factory Physics~\cite{hopp2011factory}:
+\emph{Little's Law} ($\text{WIP} = \text{TH} \times \text{CT}$),
+the \emph{VUT equation} (Eq.~\ref{eq:vut}),
+\emph{bottleneck rate} $r_b$ and \emph{raw process time} $T_0$,
+\emph{critical WIP} $W_0 = r_b \cdot T_0$, and
+the \emph{practical worst case} $\text{CT}_{\text{pwc}} = T_0 + (W-1)/r_b$.
+These provide the analytical framework for performance assertions.
+
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Abstract Syntax}
+\label{sec:syntax}
+
+The complete EBNF grammar (${\sim}540$ lines) is given in the accompanying specification (Chapter~3).
+Here we highlight the key design decisions.
+
+\subsection{Five Primitive Declarations}
+
+\praxis{} has exactly five top-level declaration forms, each corresponding to an ORIE concept, a Petri net element, and a queueing-theoretic entity:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Declaration} & \textbf{ORIE Concept} & \textbf{Petri Net} & \textbf{Queueing} \\
+\midrule
+\lstinline|type|     & Job/work item type    & Token color set     & Job class \\
+\lstinline|channel|  & Queue/buffer          & Place               & Queue \\
+\lstinline|station|  & Workstation/server    & Transition subnet   & Service center \\
+\lstinline|resource| & Shared finite resource & Resource place     & --- \\
+\lstinline|arrival|  & Arrival process       & Source transition    & External arrival \\
+\bottomrule
+\end{tabular}
+\caption{The five primitive declarations and their interpretations.}
+\label{tab:primitives}
+\end{table}
+
+\subsection{Process Algebra Operators}
+
+Processes are composed using operators from CSP and the $\pi$-calculus:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Syntax} & \textbf{Origin} & \textbf{Description} \\
+\midrule
+\lstinline|P ; Q|         & CSP             & Sequential composition \\
+\lstinline|P \| Q|        & CSP/$\pi$       & Synchronized parallel \\
+\lstinline|P \|\|\| Q|    & CSP             & Interleaved parallel \\
+\lstinline|P \|[S]\| Q|   & CSP             & Alphabetized parallel (sync on $S$) \\
+\lstinline|P [] Q|        & CSP             & External choice \\
+\lstinline|P \|~\| Q|     & CSP             & Internal choice \\
+\lstinline|pchoice|       & New             & Probabilistic choice \\
+\lstinline|a ! v| / \lstinline|a ? x| & $\pi$ & Async send/receive \\
+\lstinline|a !! v| / \lstinline|a ?? x| & $\pi$ & Sync send/receive (rendezvous) \\
+$(\nu\, a : \text{Chan}\langle T\rangle)\, P$ & $\pi$ & Restriction (new channel) \\
+\lstinline|!P|            & $\pi$           & Replication \\
+\lstinline|delay(D)|      & New             & Timed delay (distribution $D$) \\
+\bottomrule
+\end{tabular}
+\caption{Process algebra operators.}
+\label{tab:operators}
+\end{table}
+
+\subsection{Station Service Types}
+
+Each station abstracts over one of three service mechanisms:
+
+\begin{itemize}
+  \item \lstinline|prompt { ... }| --- LLM-based agent (stochastic, configurable model/temperature/tools).
+  \item \lstinline|compute { ... }| --- Deterministic computation.
+  \item \lstinline|human { ... }| --- Human task (with SLA, escalation, schedule constraints).
+\end{itemize}
+
+All three share the same queueing semantics: a service center with a given number of servers, a service time distribution, and a queue discipline.
+The distinction matters only for the \emph{implementation} of the service process, not for the \emph{performance model}.
+
+\subsection{First-Class Distributions}
+
+Distributions appear in five positions: arrival rates, service times, yield/quality, routing probabilities, and stochastic let-bindings.
+The standard library provides 15 continuous and discrete distributions plus 7 combinators (mixture, truncation, shift, scale, max, min, convolution).
+
+Every distribution $D$ has a known mean $E[D]$, variance $\mathrm{Var}[D]$, and SCV $\scv(D) = \mathrm{Var}[D] / E[D]^2$.
+The SCV is the key link to queueing performance via Equation~\ref{eq:vut}.
+
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Type System}
+\label{sec:types}
+
+\praxis{} has a kind system classifying types into \texttt{Type} (values), \texttt{Dist} (distributions), \texttt{Proc} (processes), \texttt{Chan} (channels), and \texttt{Res} (resources).
+
+The type universe has four layers: base types (Bool, Int, Float, String, Unit, Duration, Rate), composite types (records, variants, lists, sets, maps, tuples, options), domain-specific types (Chan$\langle T\rangle$, Dist$\langle T\rangle$, Resource$\langle n\rangle$), and the process type \texttt{proc}.
+
+\textbf{Duration} and \textbf{Rate} are dimensioned types enforcing dimensional consistency:
+multiplying a Rate by a Duration yields a Float (dimensionless), enabling type-safe Little's Law computations.
+
+Channel subtyping is \emph{invariant} to prevent type errors in concurrent communication.
+Record subtyping is structural (width and depth).
+
+Process typing uses a \emph{resource environment} $\Delta$ that tracks acquired resource units, with a merge operator $\oplus$ that ensures no over-allocation across parallel components.
+The typing judgment $\Gamma; \Delta \vdash P : \texttt{proc}$ ensures both type correctness and resource safety.
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Operational Semantics}
+\label{sec:opsem}
+
+The operational semantics follows Plotkin's structural approach~\cite{plotkin1981structural}.
+A \emph{configuration} $C = \langle P, \sigma, \beta, \rho, t \rangle$ comprises a process $P$, a value store $\sigma$, a buffer state $\beta$ (mapping channels to queues), a resource state $\rho$ (available units per resource), and a global clock $t$.
+
+\emph{Labels} classify actions: internal ($\tau$), channel send/receive, timed delay, resource acquire/release, station firing, sampling, and arrival.
+
+\emph{Structural congruence} establishes that parallel composition is commutative and associative, sequential composition has unit \lstinline|skip|, and replication unfolds: $!P \equiv P \mid !P$.
+
+The specification provides reduction rules for all process constructors:
+sequential composition, async and sync communication, station firing (with yield/rework),
+resource acquisition/release, all three parallel compositions, all three choice operators,
+time passage, restriction, replication, let-binding, conditionals, pattern matching,
+recursion, station invocation, and monitor expressions.
+
+\textbf{Maximal progress}: Internal actions ($\tau$) take priority over time passage.
+Time advances only when no $\tau$-actions are enabled.
+
+\textbf{Stochastic extension}: When all distributions are exponential, the semantics induces a Continuous-Time Markov Chain (CTMC).
+For general distributions, it induces a Generalized Semi-Markov Process (GSMP) with race-condition event selection.
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Petri Net Semantics}
+\label{sec:petri}
+
+The translation function $\sem{\cdot}$ maps \praxis{} programs to Coloured Generalized Stochastic Petri Nets (CGSPNs)~\cite{marsan1995modelling}.
+
+\subsection{Translation Scheme}
+
+The key correspondences are:
+\begin{itemize}
+  \item \textbf{Channels $\to$ Places}: A channel \lstinline|a : Chan<T>| maps to a place $p_a$ with color set $\sem{T}$.
+  \item \textbf{Stations $\to$ Transition subnets}: A station with $c$ servers maps to a three-place, two-transition subnet modeling the $M/G/c$ queueing behavior: an idle-server place (initial marking $c$), a busy-server place, and start/done transitions.
+  \item \textbf{Resources $\to$ Resource places}: A resource with capacity $n$ maps to a place with initial marking $n$.  Acquisition/release arcs connect to station transitions.
+  \item \textbf{Arrivals $\to$ Source transitions}: Self-enabling timed transitions.
+  \item \textbf{Composition operators $\to$ Net composition}: Sequential composition merges terminal/initial places; parallel composition fuses shared channel places; alphabetized parallel fuses only the synchronization set.
+\end{itemize}
+
+\subsection{Behavioral Equivalence}
+
+\begin{theorem}[Behavioral Equivalence]
+For every well-typed \praxis{} process $P$:
+\[
+  \text{traces}(\text{SOS}(P)) = \text{traces}(\text{PN}(\sem{P}))
+\]
+\end{theorem}
+
+The proof proceeds by structural induction, establishing a weak bisimulation between SOS configurations and Petri net markings.
+
+\subsection{Structural Analysis}
+
+P-invariants of $\sem{P}$ yield conservation properties: server conservation ($\text{idle} + \text{busy} = c$), resource conservation, and flow balance.
+Siphons and traps provide sufficient conditions for deadlock-freedom checkable in polynomial time~\cite{murata1989petri,reisig2013understanding}.
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Queueing Semantics}
+\label{sec:queueing}
+
+The extraction function $\qext{\cdot}$ maps \praxis{} systems to queueing network models.
+
+\subsection{Station Classification}
+
+Each station is classified by the BCMP theorem~\cite{baskett1975open} into one of four types based on its discipline and service distribution (Table~\ref{tab:bcmp}).
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{BCMP Type} & \textbf{Discipline} & \textbf{Service} & \textbf{\praxis{} Config} \\
+\midrule
+Type 1 & FCFS   & Exponential     & \lstinline|fifo|, \lstinline|Exponential| \\
+Type 2 & PS     & General         & \lstinline|ps| \\
+Type 3 & IS     & General (delay) & \lstinline|is(|\!\!$\infty$\!\!\lstinline|)| \\
+Type 4 & LCFS-PR & General        & \lstinline|lifo|, preemptive \\
+\bottomrule
+\end{tabular}
+\caption{BCMP station type classification.}
+\label{tab:bcmp}
+\end{table}
+
+\subsection{Analysis Methods}
+
+\praxis{} supports three analysis regimes:
+\begin{enumerate}
+  \item \textbf{Jackson networks}~\cite{jackson1957networks} for open networks with Poisson arrivals and exponential service.
+  \item \textbf{Mean Value Analysis}~\cite{reiser1980mean} for closed networks.
+  \item \textbf{VUT approximation}~\cite{hopp2011factory,whitt1993approximations} for general GI/G/c stations, using the departure approximation to propagate variability through the network.
+\end{enumerate}
+
+Little's Law~\cite{little1961proof} serves as a universal invariant: $L = \lambda W$ at every level of the system (system-wide, per-station, per-queue).
+
+\subsection{Performance Assertions}
+
+Performance assertions connect the queueing model to engineering requirements:
+\begin{lstlisting}
+assert throughput(System) >= 10/d
+assert cycle_time(System).p95 <= 2d
+assert utilization(Station) <= 0.85
+assert bottleneck(System) == CodeReview
+assert littles_law(System)
+\end{lstlisting}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Well-Formedness Conditions}
+\label{sec:wellformed}
+
+A \praxis{} system is \emph{well-formed} if it satisfies eight conditions:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}clll@{}}
+\toprule
+\textbf{\#} & \textbf{Condition} & \textbf{Ensures} & \textbf{Method} \\
+\midrule
+WF-1 & Type safety        & Preservation + progress         & Type checking \\
+WF-2 & Deadlock-freedom   & No stuck states                 & Siphon/trap analysis \\
+WF-3 & Boundedness        & No unbounded buffer growth      & P-invariant analysis \\
+WF-4 & Conservation       & Flow balance at every station   & P-invariant analysis \\
+WF-5 & Routing completeness & Every job reaches exit        & Graph reachability \\
+WF-6 & Resource sufficiency & No starvation                 & Integer programming \\
+WF-7 & Stability          & $\rho < 1$ at every station     & Traffic equations \\
+WF-8 & SPC well-formedness & Valid monitoring constraints   & Constraint checking \\
+\bottomrule
+\end{tabular}
+\caption{The eight well-formedness conditions.}
+\label{tab:wf}
+\end{table}
+
+The conditions bridge three analysis domains: the type system (WF-1), the Petri net structure (WF-2 through WF-6), and the queueing model (WF-7).
+A system satisfying all eight conditions is guaranteed to be type-safe, deadlock-free, bounded, conservative, complete, resource-sufficient, stable, and monitorable.
+
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Worked Examples}
+\label{sec:examples}
+
+The specification includes three complete examples.  We summarize them here.
+
+\subsection{CI/CD Pipeline with Code Review}
+
+A 5-station pipeline (Build $\to$ Code Review $\to$ Test $\to$ Deploy) with a rework loop (30\% of reviews request changes).
+PRs arrive at 10/day.
+Traffic equations yield effective arrival rates accounting for rework: $\lambda_{\text{CodeReview}} = 10/(1-0.3) = 14.29/\text{day}$.
+The bottleneck is Code Review ($\rho = 0.149$).
+Performance assertions verify throughput $\geq 9.5/\text{day}$, p95 cycle time $\leq 2$ days, and Little's Law.
+
+\subsection{Incident Response System}
+
+A multi-path system with severity-based routing: alerts are triaged (AI-assisted), then routed to critical response (human, 24/7), auto-remediation (80\% success), or logging.
+Failed auto-remediations escalate to human engineers.
+SPC monitoring detects response-time trends and throughput degradation.
+The system processes 100 alerts/day with p99 critical response time under 15 minutes.
+
+\subsection{Multi-Team Kanban Feature Delivery}
+
+A 3-team (Frontend, Backend, Platform) Kanban system with WIP limits, parallel development, integration testing with 25\% rework, QA, and release.
+Features arrive at 3/week.
+The join (synchronization) point introduces a delay equal to $\max(D_{\text{FE}}, D_{\text{BE}}, D_{\text{Platform}})$.
+Critical WIP $W_0 \approx 3$ features; actual expected WIP $\approx 3$--$5$, well within the WIP limit of 15.
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Related Work}
+\label{sec:related}
+
+\textbf{Process algebras for performance.}
+Stochastic extensions of process algebras have been explored extensively.
+PEPA (Performance Evaluation Process Algebra)~\cite{hillston1996compositional} associates rates with activities, yielding a CTMC.
+Stochastic $\pi$-calculus variants~\cite{priami1995stochastic} add rates to the $\pi$-calculus.
+\praxis{} differs by targeting the full generality of GI/G/c queueing (not just exponential/CTMC), by providing first-class ORIE abstractions (stations, WIP limits, rework), and by maintaining a dual Petri net structure for analysis.
+
+\textbf{Workflow and orchestration languages.}
+BPMN, YAWL, and temporal workflow specifications describe business processes but lack queueing semantics.
+\praxis{} occupies a different niche: it is a \emph{formal specification} language, not an executable workflow engine.
+
+\textbf{Queueing network tools.}
+Tools like LQNS, JINQS, and the JMT suite~\cite{bolch2006queueing} solve queueing network models but are not compositional specification languages.
+\praxis{} provides a language-level abstraction that \emph{generates} the queueing models to be solved.
+
+\textbf{Petri nets for software processes.}
+The use of Petri nets for modeling software processes dates to~\cite{kellner1999software}.
+\praxis{} contributes a \emph{typed, compositional} process algebra whose Petri net translation preserves behavioral equivalence.
+
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Conclusion and Future Work}
+\label{sec:conclusion}
+
+We have presented \praxis{}, a formal specification language for prompt-based production systems with dual Petri net and queueing semantics.
+The language's five primitive declarations, process-algebraic operators, and first-class distributions provide a compositional framework for specifying, analyzing, and reasoning about the performance of modern software delivery systems.
+
+\textbf{Future directions} include:
+\begin{itemize}
+  \item A reference implementation (parser, type checker, Petri net translator, queueing solver).
+  \item Model checking integration for automated verification of well-formedness conditions.
+  \item Simulation backend for systems with general (non-exponential) distributions.
+  \item Extension to multi-class BCMP networks with class switching.
+  \item Tool support for sensitivity analysis (how performance metrics change with parameter variations).
+  \item Integration with observability platforms for runtime performance monitoring.
+\end{itemize}
+
+The full specification (12 chapters, ${\sim}4{,}600$ lines) is available in the accompanying repository.
+
+% ══════════════════════════════════════════════════════════════════════════════
+\bibliography{references}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\appendix
+\section{Example: CI/CD Pipeline (Excerpt)}
+\label{app:cicd}
+
+\begin{lstlisting}
+type PullRequest = {
+  id: Int, author: String, title: String,
+  files_changed: Int, status: PRStatus, priority: Int
+}
+
+channel pr_queue    : Chan<PullRequest>
+channel build_queue : Chan<PullRequest>
+channel review_queue: Chan<BuildResult>
+channel rework_queue: Chan<ReviewResult>
+
+resource build_agents   : Resource<4>
+resource review_capacity: Resource<3>
+
+station BuildServer : build_queue -> review_queue {
+  servers: 4
+  discipline: fifo
+  service_time: LogNormal(log(8m), 0.6)
+  compute {
+    fn: fn(pr) -> build(pr)
+    service_time: LogNormal(log(8m), 0.6)
+  }
+}
+
+station CodeReview : review_queue -> test_queue {
+  servers: 3
+  discipline: fifo
+  service_time: LogNormal(log(45m), 0.8)
+  yield: Bernoulli(0.70)
+  rework: { probability: 0.30, target: rework_queue }
+  human {
+    role: "senior_engineer"
+    sla: 4h
+    service_time: LogNormal(log(45m), 0.8)
+    schedule: { 9h..17h }
+  }
+}
+
+arrival PRArrivals : {
+  channel: pr_queue
+  distribution: Exponential(10/d)
+  job: { id: 0, author: "dev", title: "feature",
+         files_changed: 5, status: Pending, priority: 1 }
+}
+
+assert throughput(CICDPipeline) >= 9.5/d
+assert cycle_time(CICDPipeline).p95 <= 2d
+assert bottleneck(CICDPipeline) == CodeReview
+assert deadlock_free(CICDPipeline)
+assert littles_law(CICDPipeline)
+\end{lstlisting}
+
+\end{document}
