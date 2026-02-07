@@ -509,10 +509,12 @@ The following are defined as syntactic sugar over core constructs:
 |-------|------------|
 | `P \|> Q` (pipe) | `(nu c : Chan<T>) (P ; c ! result ; skip) \| (c ? x ; Q)` |
 | `retry(n, P)` | `rec X(k: Int = n). if k <= 0 then stop else (P [] X(k-1))` |
-| `timeout(d, P, Q)` | `(P \|[{done}]\| (delay(Deterministic(d)) ; done ! unit)) [] Q` |
-| `P >>= f` | `P ; let x = result in f(x)` |
+| `timeout(d, P, Q)` | `(nu done : Chan<Unit>) ((P ; done ! ()) \|[{done}]\| (delay(Deterministic(d)) ; done ! ())) [] Q` |
+| `P >>= f` | See note below |
 | `par(Ps)` | Fold of `\|\|\|` over process list Ps |
 | `seq(Ps)` | Fold of `;` over process list Ps |
+
+**Note on `>>=`.** The monadic bind `P >>= f` is syntactic sugar for piping a process result through a function. Since STOKED processes communicate via channels rather than return values, `P >>= f` requires P to produce its result on a designated channel. Specifically, `P >>= f` desugars to `(nu c : Chan<T>) (P[c/out] | (c ? x ; f(x)))`, where `out` is the conventional output channel of P. This sugar is primarily useful with station invocations, where the output channel is well-defined.
 
 ## 3.15 Well-Formedness Constraints on Syntax
 

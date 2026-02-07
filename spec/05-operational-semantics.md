@@ -69,6 +69,7 @@ P ||| stop  ≡  P                                   [SC-IntUnit]
 /* Sequential composition has right unit skip */
 P ; skip  ≡  P                                     [SC-SeqUnit]
 skip ; P  ≡  P                                     [SC-SeqUnitL]
+stop ; P  ≡  stop                                    [SC-SeqStop]
 
 /* Restriction */
 (nu a) (nu b) P  ≡  (nu b) (nu a) P                [SC-ResComm]
@@ -77,6 +78,9 @@ skip ; P  ≡  P                                     [SC-SeqUnitL]
 
 /* Replication */
 !P  ≡  P | !P                                      [SC-Repl]
+
+/* Alpha-conversion */
+(nu a) P  ≡  (nu b) P[b/a]     if b ∉ fn(P)          [SC-Alpha]
 
 /* Choice */
 P [] Q  ≡  Q [] P                                  [SC-ExtComm]
@@ -183,8 +187,10 @@ A station fires when:
     ⟨P, σ, β, ρ, t⟩ →_{a!v} ⟨P', σ₁, β₁, ρ, t⟩
     ⟨Q, σ, β, ρ, t⟩ →_{a?v} ⟨Q', σ₂, β₂, ρ, t⟩
     ──────────────────────────────────────────────────── [R-ParSync]
-    ⟨P | Q, σ, β, ρ, t⟩ →_τ ⟨P' | Q', σ₁∪σ₂, β', ρ, t⟩
+    ⟨P | Q, σ, β, ρ, t⟩ →_τ ⟨P' | Q', σ₁∪σ₂, β, ρ, t⟩
 ```
+
+**Remark.** In [R-ParSync], the buffer state β is unchanged because the synchronized communication transfers the value directly from sender to receiver without intermediate buffering.
 
 **Interleaved parallel** (P ||| Q): components proceed fully independently; no synchronization.
 
@@ -254,7 +260,24 @@ Time advances globally: all parallel components observe the same clock.
     ⟨Q, σ, β, ρ, t⟩ →_{tick(δ)} ⟨Q', σ, β, ρ, t+δ⟩
     ────────────────────────────────────────────────────── [R-TimePar]
     ⟨P | Q, σ, β, ρ, t⟩ →_{tick(δ)} ⟨P' | Q', σ, β, ρ, t+δ⟩
+
+    ⟨P, σ, β, ρ, t⟩ →_{tick(δ)} ⟨P', σ, β, ρ, t+δ⟩
+    ⟨Q, σ, β, ρ, t⟩ →_{tick(δ)} ⟨Q', σ, β, ρ, t+δ⟩
+    ────────────────────────────────────────────────────── [R-TimeIntl]
+    ⟨P ||| Q, σ, β, ρ, t⟩ →_{tick(δ)} ⟨P' ||| Q', σ, β, ρ, t+δ⟩
+
+    ⟨P, σ, β, ρ, t⟩ →_{tick(δ)} ⟨P', σ, β, ρ, t+δ⟩
+    ⟨Q, σ, β, ρ, t⟩ →_{tick(δ)} ⟨Q', σ, β, ρ, t+δ⟩
+    ────────────────────────────────────────────────────── [R-TimeAlpha]
+    ⟨P |[S]| Q, σ, β, ρ, t⟩ →_{tick(δ)} ⟨P' |[S]| Q', σ, β, ρ, t+δ⟩
+
+    ⟨P, σ, β, ρ, t⟩ →_{tick(δ)} ⟨P', σ, β, ρ, t+δ⟩
+    ⟨Q, σ, β, ρ, t⟩ →_{tick(δ)} ⟨Q', σ, β, ρ, t+δ⟩
+    ────────────────────────────────────────────────────── [R-TimeChoice]
+    ⟨P [] Q, σ, β, ρ, t⟩ →_{tick(δ)} ⟨P' [] Q', σ, β, ρ, t+δ⟩
 ```
+
+**Remark.** Internal choice (`P |~| Q`) and probabilistic choice (`pchoice`) resolve instantly via τ-transitions and do not require time passage rules; maximal progress ensures they resolve before time advances.
 
 **Maximal progress**: Internal (τ) actions take priority over time passage. Time advances only when no τ-actions are enabled (the *timelock-freedom* condition).
 
@@ -360,7 +383,14 @@ Station invocation applies the station's service process to the input value, sam
       →_τ ⟨Pᵢ, σ, β, ρ, t⟩
 ```
 
-Monitor blocks are reactive: they trigger when an SPC condition is violated. In the absence of violations, the monitor is quiescent (behaves as `skip`).
+Monitor blocks are reactive: they trigger when an SPC condition is violated.
+
+    ∀i. metric(s) does not violate condition cᵢ
+    ─────────────────────────────────────────────────────── [R-MonitorQuiescent]
+    ⟨monitor(s) { when c₁ => P₁, ..., when cₙ => Pₙ }, σ, β, ρ, t⟩
+      →_{tick(δ)} ⟨monitor(s) { when c₁ => P₁, ..., when cₙ => Pₙ }, σ, β, ρ, t+δ⟩
+
+In the absence of violations, the monitor allows time to pass and re-evaluates conditions after each tick.
 
 ## 5.5 Arrival Semantics
 

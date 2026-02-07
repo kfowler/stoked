@@ -271,7 +271,7 @@ Restriction hides the place corresponding to channel a from the external interfa
     a fresh copy with fresh internal places.
 ```
 
-In practice, replication is bounded by resource constraints or WIP limits, yielding a finite unfolding.
+**Remark.** Unbounded replication (`!P`) can generate an unbounded number of fresh places via `t_spawn`, violating the finite place set of Definition 6.1. In practice, replication is bounded by resource constraints, WIP limits, or finite channel capacities, yielding a finite unfolding. Conforming analyses should either (a) unfold to a finite depth bounded by the system's WIP or resource limits, or (b) use symbolic/parameterized techniques that handle infinite-state Petri nets.
 
 ### 6.4.9 Timed Delay
 
@@ -289,7 +289,26 @@ In practice, replication is bounded by resource constraints or WIP limits, yield
         (t_delay, p_done)   weight 1
 ```
 
-### 6.4.10 Send and Receive
+### 6.4.10 Primitive Processes
+
+```
+⟦stop⟧ =
+    Places:
+        p_stop       -- a single place, initially marked
+
+    No transitions. The subnet is inert: the token remains in p_stop
+    indefinitely, representing permanent inaction.
+
+
+⟦skip⟧ =
+    Places:
+        p_done       -- terminal place, initially marked
+
+    No transitions. The token in p_done signals successful termination
+    and is available for sequential composition (§6.4.1) to consume.
+```
+
+### 6.4.11 Send and Receive
 
 ```
 ⟦a ! v⟧ =
@@ -314,7 +333,29 @@ In practice, replication is bounded by resource constraints or WIP limits, yield
     Binding: x is bound to the color of the consumed token.
 ```
 
-### 6.4.11 Station Invocation
+**Synchronous (rendezvous) communication:**
+
+```
+⟦(a !! v ; P) | (a ?? x ; Q)⟧ =
+    Places:
+        p_send_ready     -- sender ready (initial marking: 1)
+        p_recv_ready     -- receiver ready (initial marking: 1)
+
+    Transitions:
+        t_rendezvous     -- immediate
+
+    Arcs:
+        (p_send_ready, t_rendezvous)    weight 1
+        (p_recv_ready, t_rendezvous)    weight 1
+        (t_rendezvous, p_start(N_P))    weight 1
+        (t_rendezvous, p_start(N_Q))    weight 1
+
+    Binding: x is bound to ⟦v⟧. No intermediate place is needed —
+    the value transfer occurs atomically at the rendezvous transition.
+    Unlike async communication, no channel place is involved.
+```
+
+### 6.4.12 Station Invocation
 
 ```
 ⟦s(v)⟧ =
@@ -323,7 +364,7 @@ In practice, replication is bounded by resource constraints or WIP limits, yield
     depositing the result on the station's output channel place.
 ```
 
-### 6.4.12 Recursive Processes
+### 6.4.13 Recursive Processes
 
 ```
 ⟦rec X(x̄). P⟧ =
@@ -336,7 +377,7 @@ In practice, replication is bounded by resource constraints or WIP limits, yield
         where t_loop is an immediate transition.
 ```
 
-### 6.4.13 Let Binding, Conditional, Match
+### 6.4.14 Let Binding, Conditional, Match
 
 ```
 ⟦let x = e in P⟧ = ⟦P[eval(e)/x]⟧
@@ -352,7 +393,7 @@ In practice, replication is bounded by resource constraints or WIP limits, yield
     mutually exclusive guards G(t_i) = match(eval(e), patᵢ).
 ```
 
-### 6.4.14 Monitor (SPC)
+### 6.4.15 Monitor (SPC)
 
 ```
 ⟦monitor(s) { when c₁ => P₁, ..., when cₙ => Pₙ }⟧ =
@@ -362,7 +403,7 @@ In practice, replication is bounded by resource constraints or WIP limits, yield
     whose firing enables subnet ⟦Pᵢ⟧.
 ```
 
-### 6.4.15 WIP Limits
+### 6.4.16 WIP Limits
 
 ```
 ⟦station s { ..., wip limit: W, ... }⟧ =

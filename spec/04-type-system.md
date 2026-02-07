@@ -142,6 +142,8 @@ A *type environment* Γ is a finite ordered sequence of bindings:
     | Γ, X : proc                                -- process variable binding
 ```
 
+The type `Station(T_in, T_out)` used in station bindings is a meta-level type (not a surface syntax type). It records the input and output types of the station for use in typing rules [T-StationInvoke] and [T-Monitor].
+
 **Well-formedness of environments:**
 
 ```
@@ -187,6 +189,8 @@ Lists in STOKED are immutable value types, making covariance sound.
     ────────────────────────── [Sub-Dist]
     Dist<T> <: Dist<U>
 ```
+
+Distributions are covariant because STOKED distributions are immutable generators: a `Dist<T>` produces values of type T but cannot be "written to." This mirrors the argument for List covariance above.
 
 **Channel subtyping** is *invariant* — `Chan<T> <: Chan<U>` if and only if `T = U`. This prevents type errors in concurrent communication.
 
@@ -295,6 +299,40 @@ Integer values may be used where Float is expected. This is the only implicit co
 ```
 
 The stochastic let-binding `let stochastic x ~ D in e` draws a sample from distribution D and binds it to x. The type of x is T (the base type of the distribution), not Dist<T>.
+
+### 4.5.2 Collection Constructors
+
+```
+    ∀i. Γ ⊢ eᵢ : T
+    ──────────────────────────────────── [T-List]
+    Γ ⊢ [e₁, ..., eₙ] : List<T>
+
+    Γ ⊢ e₁ : T₁    Γ ⊢ e₂ : T₂    ...    Γ ⊢ eₙ : Tₙ
+    ──────────────────────────────────────────────────────── [T-Tuple]
+    Γ ⊢ (e₁, e₂, ..., eₙ) : (T₁, T₂, ..., Tₙ)
+
+    ∀i. Γ ⊢ eᵢ : T
+    ──────────────────────────────────── [T-Set]
+    Γ ⊢ {e₁, ..., eₙ} : Set<T>
+
+    ∀i. Γ ⊢ kᵢ : Tₖ    ∀i. Γ ⊢ vᵢ : Tᵥ
+    ──────────────────────────────────────────────── [T-Map]
+    Γ ⊢ {k₁: v₁, ..., kₙ: vₙ} : Map<Tₖ, Tᵥ>
+```
+
+**Note.** The [T-Tuple] rule assigns each position its own type. The [T-Set] and [T-Map] rules require homogeneous element types. The [T-Map] literal syntax overlaps with record syntax; disambiguation relies on whether field names are identifiers (records) or arbitrary expressions (maps).
+
+### 4.5.3 Concatenation
+
+```
+    Γ ⊢ e₁ : String    Γ ⊢ e₂ : String
+    ─────────────────────────────────────── [T-StringConcat]
+    Γ ⊢ e₁ ++ e₂ : String
+
+    Γ ⊢ e₁ : List<T>    Γ ⊢ e₂ : List<T>
+    ─────────────────────────────────────── [T-ListConcat]
+    Γ ⊢ e₁ ++ e₂ : List<T>
+```
 
 ## 4.6 Typing Judgments for Distributions
 
@@ -618,6 +656,26 @@ The merge operator ⊕ ensures no over-allocation:
     X : proc ∈ Γ
     ──────────────────────────────────────── [T-AssertConservative]
     Γ ⊢ assert conservative(X) ok
+
+    X : proc ∈ Γ    Γ ⊢ k : Int
+    ──────────────────────────────────────── [T-AssertBounded]
+    Γ ⊢ assert bounded(X, k) ok
+
+    X : proc ∈ Γ
+    ──────────────────────────────────────── [T-AssertLive]
+    Γ ⊢ assert live(X) ok
+
+    X : proc ∈ Γ    s : Station(_, _) ∈ Γ
+    ──────────────────────────────────────── [T-AssertBottleneck]
+    Γ ⊢ assert bottleneck(X) == s ok
+
+    X : proc ∈ Γ    Γ ⊢ bound : Duration
+    ──────────────────────────────────────── [T-AssertCycleTime]
+    Γ ⊢ assert cycle_time(X).p95 <= bound ok
+
+    X : proc ∈ Γ    Γ ⊢ bound : Int
+    ──────────────────────────────────────── [T-AssertWIP]
+    Γ ⊢ assert wip(X) <= bound ok
 ```
 
 ## 4.11 Type Soundness

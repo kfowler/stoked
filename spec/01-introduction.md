@@ -127,7 +127,7 @@ This specification is organized in three parts with two appendices:
 | **Appendix A** | — | Proof sketches |
 | **Appendix B** | — | Equivalence relations and algebraic laws |
 
-**Dependency graph**: Chapter 3 (abstract syntax) is the keystone — all subsequent chapters reference its grammar. Chapter 4 (type system) is required by Chapters 5–8. Chapters 6 and 7 are mutually independent but both depend on Chapter 5. Chapter 9 depends on Chapters 3–4. Chapter 10 depends on all prior chapters.
+**Dependency graph**: Chapter 3 (abstract syntax) is the keystone — all subsequent chapters reference its grammar. Chapter 4 (type system) is required by Chapters 5–8. Chapters 6 and 7 are mutually independent but both depend on Chapter 5. Chapter 9 depends on Chapters 3–5. Chapter 10 depends on all prior chapters.
 
 ## 1.6 Typographic Conventions
 
@@ -137,8 +137,8 @@ See Chapter 2 for the complete notation guide. In brief:
 - *italic* for meta-variables and defined terms on first use
 - **bold** for emphasis and defined names
 - Mathematical notation (Γ, ⊢, →) for formal judgments
-- `[[P]]` for the Petri net translation function
-- `Q(P)` for the queueing model extraction function
+- ⟦P⟧ for the Petri net translation function
+- Q(·) for the queueing model extraction function
 
 ## 1.7 Versioning
 

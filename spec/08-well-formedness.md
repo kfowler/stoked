@@ -204,13 +204,13 @@ This assertion requires WF-7. A system that is not stable will have unbounded WI
 
 ### 8.8.2 Stability with Rework
 
-Rework loops increase effective utilization. For a station with rework probability p_r back to itself:
+Rework loops increase effective utilization. For a station with self-rework probability p_r (i.e., fraction p_r of completed jobs return to the same station), the effective arrival rate is λ_eff(s) = λ_ext(s) / (1 - p_r), where λ_ext(s) is the external (non-rework) arrival rate. The effective utilization is:
 
 ```
-ρ_eff(s) = λ(s) / ((1 - p_r) · c(s) · μ(s))
+ρ_eff(s) = λ_ext(s) / ((1 - p_r) · c(s) · μ(s))
 ```
 
-The stability condition becomes ρ_eff(s) < 1, which is more restrictive than the base case.
+The stability condition ρ_eff(s) < 1 requires that the base service capacity exceeds the amplified arrival rate. This is more restrictive than the no-rework case by a factor of 1/(1 - p_r).
 
 ## 8.9 SPC Well-Formedness (WF-8)
 

@@ -123,6 +123,8 @@ P ; skip  ~  P                                      [Seq-UnitR]
 stop ; P  ~  stop                                    [Seq-StopL]
 ```
 
+**Remark.** There is no simplification law for `P ; stop` in general. If P terminates (reduces to `skip`), then `P ; stop` reduces to `stop` via [SC-SeqUnit] and [Seq-StopL]. If P diverges, `P ; stop` behaves as P. The asymmetry between [Seq-StopL] (`stop` absorbs on the left) and the absence of a right-stop law reflects the fact that sequential composition is not commutative.
+
 ### B.4.2 Laws of Parallel Composition
 
 ```
@@ -242,9 +244,11 @@ If P ~ P', then:
 
 **Proof sketch.** For each operator, the bisimulation relation is constructed by pairing corresponding configurations. The key insight is that each operator's semantics is defined compositionally (the transitions of the composite depend only on the transitions of the components), so substituting bisimilar components preserves the bisimulation property. □
 
-**Theorem B.3.** Weak bisimilarity (≈) is a congruence for all STOKED operators except external choice ([]).
+**Theorem B.3.** Weak bisimilarity (≈) is a congruence for all STOKED operators except external choice (`[]`). In particular, ≈ is a congruence for internal choice (`|~|`), probabilistic choice (`pchoice`), parallel composition, sequential composition, restriction, and replication.
 
 **Remark.** The failure of weak bisimilarity to be a congruence for external choice is standard in process algebra (the "problem of the external choice"). STOKED inherits this from CSP. For external choice, trace-failures equivalence (not defined here) is the appropriate congruence.
+
+**Remark.** Probabilistic choice preserves weak bisimilarity because the τ-transition resolving the choice is matched by a corresponding τ-transition in the bisimulating process — the weights (probabilities) are preserved by definition of probabilistic bisimulation. For a full treatment, see Segala and Lynch's probabilistic automata framework.
 
 **Theorem B.4.** Performance equivalence (≡_perf) is a congruence for sequential composition, parallel composition, and choice operators (where the queueing network structure is preserved).
 

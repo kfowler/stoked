@@ -39,12 +39,17 @@ Throughout this specification, the following meta-variable conventions are used 
 | Meta-variable | Ranges over | Defined in |
 |---------------|------------|------------|
 | Γ | Type environments | §4.3 |
-| Δ | Resource environments | §4.6 |
+| Δ | Resource environments | §4.7.1 |
 | σ | Substitutions | §4.4 |
 | C | Configurations | §5.1 |
 | μ | Labels (actions) | §5.2 |
 | N | Petri nets | §6.1 |
 | Q | Queueing models | §7.1 |
+
+**Disambiguation.** Several symbols are conventionally overloaded across mathematical domains. Context resolves ambiguity:
+- **μ** denotes *labels* (actions) in the operational semantics (§5) and *service rate* in queueing notation (§2.4.1, §7). When both appear in the same context, labels are written μ and service rates are written μ_s or 1/E[S].
+- **K** denotes *kinds* in the type system (§4.1) and *system capacity* (buffer + servers) in queueing notation (§2.4.2). These never co-occur in a single judgment.
+- **Q** denotes *processes* as a meta-variable (§2.1.2), *queueing models* as a semantic domain (this table), and the *CTMC generator matrix* (§5.6.1). Usage is clear from context: Q(·) always denotes the queueing extraction function, and the generator matrix Q appears only in §5.6.
 
 ## 2.2 Judgment Forms
 

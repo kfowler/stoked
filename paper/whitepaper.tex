@@ -273,11 +273,11 @@ Processes are composed using operators from CSP and the $\pi$-calculus:
 \textbf{Syntax} & \textbf{Origin} & \textbf{Description} \\
 \midrule
 \lstinline|P ; Q|         & CSP             & Sequential composition \\
-\lstinline|P \| Q|        & CSP/$\pi$       & Synchronized parallel \\
-\lstinline|P \|\|\| Q|    & CSP             & Interleaved parallel \\
-\lstinline|P \|[S]\| Q|   & CSP             & Alphabetized parallel (sync on $S$) \\
-\lstinline|P [] Q|        & CSP             & External choice \\
-\lstinline|P \|~\| Q|     & CSP             & Internal choice \\
+\lstinline!P | Q!         & CSP/$\pi$       & Synchronized parallel \\
+\lstinline!P ||| Q!       & CSP             & Interleaved parallel \\
+\lstinline!P |[S]| Q!     & CSP             & Alphabetized parallel (sync on $S$) \\
+\lstinline!P [] Q!        & CSP             & External choice \\
+\lstinline!P |~| Q!       & CSP             & Internal choice \\
 \lstinline|pchoice|       & New             & Probabilistic choice \\
 \lstinline|a ! v| / \lstinline|a ? x| & $\pi$ & Async send/receive \\
 \lstinline|a !! v| / \lstinline|a ?? x| & $\pi$ & Sync send/receive (rendezvous) \\
