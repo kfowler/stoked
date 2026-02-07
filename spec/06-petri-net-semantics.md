@@ -115,6 +115,8 @@ This is the standard M/G/c queueing subnet in Petri net form. The p_idle place l
         (t_rework(s), p_{a_rework})
 ```
 
+**Scrap handling.** When yield produces scrap (the probability 1 - p_yield that routes to neither the output nor the rework target), the scrap token is consumed by a sink transition t_scrap with weight = floor((1 - p_yield) * 1000). An additional immediate transition t_scrap(s) fires from p_busy(s) to a sink place p_scrap(s), where the token is absorbed. The `scrap_rate` metric (§3.11) measures the throughput of this transition.
+
 ### 6.3.3 Resources → Resource Places
 
 ```

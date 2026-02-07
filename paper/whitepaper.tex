@@ -218,7 +218,7 @@ It holds for \emph{any} stable system regardless of distributional assumptions.
 
 \textbf{The VUT equation}~\cite{hopp2011factory,kingman1961single}: For a GI/G/c queue, the expected waiting time in queue is approximately:
 \begin{equation}\label{eq:vut}
-  W_q \;\approx\; \underbrace{\left(\frac{\scv_a + \scv_s}{2}\right)}_{\text{Variability}} \;\cdot\; \underbrace{\frac{\rho^{\sqrt{2(c+1)}}}{1 - \rho}}_{\text{Utilization}} \;\cdot\; \underbrace{E[S]}_{\text{Time}}
+  W_q \;\approx\; \underbrace{\left(\frac{\scv_a + \scv_s}{2}\right)}_{\text{Variability}} \;\cdot\; \underbrace{\frac{\rho^{\sqrt{2(c+1)}}}{c\,(1 - \rho)}}_{\text{Utilization}} \;\cdot\; \underbrace{E[S]}_{\text{Time}}
 \end{equation}
 where $\scv_a$ and $\scv_s$ are the squared coefficients of variation of inter-arrival and service times, $\rho = \lambda/(c\mu)$ is utilization, and $E[S]$ is mean service time.
 This connects distribution parameters directly to performance, which is why \stoked{} makes distributions first-class.
@@ -471,7 +471,7 @@ The specification includes three complete examples.  We summarize them here.
 
 \subsection{CI/CD Pipeline with Code Review}
 
-A 5-station pipeline (Build $\to$ Code Review $\to$ Test $\to$ Deploy) with a rework loop (30\% of reviews request changes).
+A 4-station pipeline (Build $\to$ Code Review $\to$ Test $\to$ Deploy) with a rework loop (30\% of reviews request changes).
 PRs arrive at 10/day.
 Traffic equations yield effective arrival rates accounting for rework: $\lambda_{\text{CodeReview}} = 10/(1-0.3) = 14.29/\text{day}$.
 The bottleneck is Code Review ($\rho = 0.149$).

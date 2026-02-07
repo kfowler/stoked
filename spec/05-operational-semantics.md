@@ -4,7 +4,7 @@
 
 ---
 
-This chapter defines the operational semantics of STOKED as a labeled transition system (LTS). The semantics is given in the structural operational semantics (SOS) style, following Plotkin's approach. We define configurations, labels, structural congruence, and reduction rules for all process constructors defined in §3.5.
+This chapter defines the operational semantics of STOKED as a labeled transition system (LTS). The semantics is given in the structural operational semantics (SOS) style, following Plotkin's approach. We define configurations, labels, structural congruence, and reduction rules for all process constructors defined in §3.6.
 
 ## 5.1 Configurations
 
@@ -123,6 +123,8 @@ where fn(P) denotes the set of free channel names in P.
 Synchronous communication requires both sender and receiver to be ready simultaneously. No buffering occurs.
 
 ### 5.4.4 Station Firing
+
+**Notation.** For a station s with server count c, we write active(s) for the number of jobs currently being processed by s, and station_process(s) for the service process function Phi associated with s.
 
 A station fires when:
 1. There is a job available on the input channel
@@ -299,6 +301,10 @@ Replication unfolds by structural congruence [SC-Repl].
     ─────────────────────────────────────────────────────── [R-LetProc]
     ⟨let x = e in P, σ, β, ρ, t⟩ →_τ ⟨P, σ', β, ρ, t⟩
 
+    v sampled from D
+    ─────────────────────────────────────────────────────────── [R-StochLetProc]
+    ⟨let stochastic x ~ D in P, σ, β, ρ, t⟩ →_τ ⟨P[v/x], σ, β, ρ, t⟩
+
     eval(e, σ) = true
     ─────────────────────────────────────────────────────────── [R-IfTrue]
     ⟨if e then P else Q, σ, β, ρ, t⟩ →_τ ⟨P, σ, β, ρ, t⟩
@@ -323,7 +329,16 @@ Replication unfolds by structural congruence [SC-Repl].
 
 Recursion unfolds by substituting the recursive definition for X and binding the parameters.
 
-### 5.4.14 Station Invocation
+### 5.4.14 Process Invocation
+
+**[R-ProcInvoke]:** Process invocation (where X is defined by `process X(x₁, ..., xₙ) = P`):
+
+```
+    ─────────────────────────────────────────────────────── [R-ProcInvoke]
+    ⟨X(v₁, ..., vₙ), σ, β, ρ, t⟩ →_τ ⟨P[v₁/x₁, ..., vₙ/xₙ], σ, β, ρ, t⟩
+```
+
+### 5.4.15 Station Invocation
 
 ```
     s = station(a_in -> a_out) { servers: c, service_time: D, ... Φ }
@@ -336,7 +351,7 @@ Recursion unfolds by substituting the recursive definition for X and binding the
 
 Station invocation applies the station's service process to the input value, samples a service time delay, and deposits the output on the station's output channel.
 
-### 5.4.15 Monitor (SPC)
+### 5.4.16 Monitor (SPC)
 
 ```
     metric(s) violates condition cᵢ

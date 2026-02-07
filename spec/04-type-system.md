@@ -54,6 +54,18 @@ K ::= Type                    -- the kind of value types
 ─────────────────── [K-Option]
 ⊢ Option<T> : Type
 
+    ⊢ T : Type
+─────────────────── [K-Set]
+⊢ Set<T> : Type
+
+    ⊢ T₁ : Type  ...  ⊢ Tₙ : Type
+──────────────────────────────────── [K-Tuple]
+⊢ (T₁, ..., Tₙ) : Type
+
+    ⊢ T₁ : Type  ...  ⊢ Tₙ : Type
+──────────────────────────────────── [K-Variant]
+⊢ C₁(T₁) | ... | Cₙ(Tₙ) : Type
+
     ⊢ Tₖ : Type    ⊢ Tᵥ : Type
 ─────────────────────────────────── [K-Map]
 ⊢ Map<Tₖ, Tᵥ> : Type
@@ -164,6 +176,8 @@ T <: T
     T <: U
     ──────────────────── [Sub-List]
     List<T> <: List<U>
+
+Lists in STOKED are immutable value types, making covariance sound.
 
     T <: U
     ────────────────────────── [Sub-Option]
@@ -324,6 +338,83 @@ The stochastic let-binding `let stochastic x ~ D in e` draws a sample from distr
     Γ ⊢ D₁ : Dist<Duration>    Γ ⊢ D₂ : Dist<Duration>
     ──────────────────────────────────────────────────────── [T-Convolve]
     Γ ⊢ convolve(D₁, D₂) : Dist<Duration>
+```
+
+**Remaining Continuous Distributions.** The following distributions are typed analogously:
+
+```
+[T-Erlang]
+    Γ ⊢ k : Int    Γ ⊢ λ : Rate
+    ────────────────────────────────
+    Γ ⊢ Erlang(k, λ) : Dist<Duration>
+
+[T-Triangular]
+    Γ ⊢ a : Duration    Γ ⊢ m : Duration    Γ ⊢ b : Duration
+    ──────────────────────────────────────────────────────────
+    Γ ⊢ Triangular(a, m, b) : Dist<Duration>
+
+[T-Gamma]
+    Γ ⊢ α : Float    Γ ⊢ β : Float
+    ─────────────────────────────────
+    Γ ⊢ Gamma(α, β) : Dist<Duration>
+
+[T-Weibull]
+    Γ ⊢ k : Float    Γ ⊢ λ : Float
+    ─────────────────────────────────
+    Γ ⊢ Weibull(k, λ) : Dist<Duration>
+
+[T-Beta]
+    Γ ⊢ α : Float    Γ ⊢ β : Float
+    ─────────────────────────────────
+    Γ ⊢ Beta(α, β) : Dist<Float>
+
+[T-Pareto]
+    Γ ⊢ α : Float    Γ ⊢ x_m : Float
+    ────────────────────────────────────
+    Γ ⊢ Pareto(α, x_m) : Dist<Duration>
+```
+
+**Remaining Discrete Distributions.**
+
+```
+[T-Binomial]
+    Γ ⊢ n : Int    Γ ⊢ p : Float
+    ───────────────────────────────
+    Γ ⊢ Binomial(n, p) : Dist<Int>
+
+[T-Geometric]
+    Γ ⊢ p : Float
+    ──────────────────────────────
+    Γ ⊢ Geometric(p) : Dist<Int>
+
+[T-Empirical]
+    Γ ⊢ vs : List<T>
+    ──────────────────────────────
+    Γ ⊢ Empirical(vs) : Dist<T>
+```
+
+**Remaining Combinators.**
+
+```
+[T-Shift]
+    Γ ⊢ D : Dist<Duration>    Γ ⊢ offset : Duration
+    ──────────────────────────────────────────────────
+    Γ ⊢ shift(D, offset) : Dist<Duration>
+
+[T-Scale]
+    Γ ⊢ D : Dist<Duration>    Γ ⊢ factor : Float
+    ──────────────────────────────────────────────
+    Γ ⊢ scale(D, factor) : Dist<Duration>
+
+[T-MaxOf]
+    Γ ⊢ D₁ : Dist<Duration>    Γ ⊢ D₂ : Dist<Duration>
+    ──────────────────────────────────────────────────────
+    Γ ⊢ max_of(D₁, D₂) : Dist<Duration>
+
+[T-MinOf]
+    Γ ⊢ D₁ : Dist<Duration>    Γ ⊢ D₂ : Dist<Duration>
+    ──────────────────────────────────────────────────────
+    Γ ⊢ min_of(D₁, D₂) : Dist<Duration>
 ```
 
 ### 4.6.1 Distribution Properties (Compile-Time)

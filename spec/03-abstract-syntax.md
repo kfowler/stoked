@@ -31,8 +31,9 @@ assert    import    module    as        where
 forall    exists    nu        pchoice   priority
 batch     schedule  sla       escalate  yield
 rework    scrap     wip       limit     discipline
-fifo      lifo      priority  spt       edd
-monitor   spc       and       or        not
+fifo      lifo      spt       edd       ps
+stochastic monitor  spc       and       or
+not
 ```
 
 ### 3.1.3 Literals
@@ -92,8 +93,6 @@ Type        ::= BaseType
              |  ChannelType
              |  DistType
              |  ResourceType
-             |  TimeType
-             |  RateType
              |  TypeRef
              |  '(' Type ')'
 
@@ -135,13 +134,23 @@ DistType    ::= 'Dist' '<' Type '>'
 ResourceType
             ::= 'Resource' '<' IntLit '>'    /* capacity */
 
-TimeType    ::= 'Duration'
-RateType    ::= 'Rate'
-
 TypeRef     ::= QualIdent [ '<' Type { ',' Type } '>' ]
 ```
 
-## 3.4 Expressions
+## 3.4 Channel Declarations
+
+```ebnf
+ChannelDecl
+            ::= 'channel' Ident ':' Type [ '{' ChannelConfig '}' ]
+
+ChannelConfig
+            ::= { ChannelConfigItem }
+
+ChannelConfigItem
+            ::= 'capacity' ':' ( IntLit | '∞' )
+```
+
+## 3.5 Expressions
 
 ```ebnf
 Expr        ::= Literal
@@ -193,7 +202,7 @@ BinOp       ::= '+' | '-' | '*' | '/' | '%'         /* arithmetic */
 UnOp        ::= '-' | 'not'
 ```
 
-## 3.5 Process Expressions
+## 3.6 Process Expressions
 
 This is the core of STOKED. Process expressions describe the control flow and communication structure of a production system.
 
@@ -258,7 +267,7 @@ SPCCondition
              |  'shift' '(' Ident ',' Expr ')'                /* mean shift */
 ```
 
-## 3.6 Station Declarations
+## 3.7 Station Declarations
 
 Stations are the workstations of the production system — the servers in queueing-theoretic terms.
 
@@ -293,7 +302,12 @@ ConfigItem  ::= 'servers' ':' Expr
              |  'yield' ':' DistExpr                 /* P(good output) */
              |  'rework' ':' ReworkSpec
              |  'priority' ':' Expr
+             |  'service_time' ':' DistExpr              /* station-level service time */
+```
 
+**Note on dual `service_time` declarations.** When `service_time` appears in both the station configuration and the service process block, the station-level `service_time` governs queueing analysis (§7) while the service process `service_time` governs operational behavior (§5). These should agree; well-formedness could enforce this.
+
+```ebnf
 Discipline  ::= 'fifo' | 'lifo' | 'priority' | 'spt' | 'edd' | 'ps'
              |  'is' '(' ( IntLit | '∞' ) ')'       /* infinite-server (delay) */
 
@@ -355,7 +369,7 @@ StationInvoke
             ::= Ident '(' [ Expr { ',' Expr } ] ')'
 ```
 
-## 3.7 Distribution Expressions
+## 3.8 Distribution Expressions
 
 Distributions are first-class in STOKED. They appear in five positions: arrival rates, service times, yield/quality, routing probabilities, and stochastic let-bindings.
 
@@ -396,7 +410,7 @@ MixComponent
             ::= Expr ':' DistExpr                    /* weight : distribution */
 ```
 
-## 3.8 Resource Declarations
+## 3.9 Resource Declarations
 
 ```ebnf
 ResourceDecl
@@ -412,7 +426,7 @@ ResourceItem
              |  'preemptible' ':' BoolLit
 ```
 
-## 3.9 Arrival Declarations
+## 3.10 Arrival Declarations
 
 ```ebnf
 ArrivalDecl ::= 'arrival' Ident ':' ArrivalSpec
@@ -430,7 +444,7 @@ ArrivalItem ::= 'channel' ':' Ident
              |  'class' ':' Ident                     /* job class for BCMP */
 ```
 
-## 3.10 Performance Assertions
+## 3.11 Performance Assertions
 
 ```ebnf
 AssertDecl  ::= 'assert' AssertExpr
@@ -458,13 +472,13 @@ Percentile  ::= 'mean' | 'p50' | 'p90' | 'p95' | 'p99' | 'max'
 CompOp      ::= '<' | '<=' | '>' | '>=' | '==' | '!='
 ```
 
-## 3.11 Let Declarations (Top-Level)
+## 3.12 Let Declarations (Top-Level)
 
 ```ebnf
 LetDecl     ::= 'let' Ident [ ':' Type ] '=' Expr
 ```
 
-## 3.12 Operator Precedence and Associativity
+## 3.13 Operator Precedence and Associativity
 
 Operators are listed from lowest to highest precedence:
 
@@ -487,7 +501,7 @@ Operators are listed from lowest to highest precedence:
 
 Sequential composition (`;`) binds most loosely among process operators, so `a!v ; P [] Q` parses as `(a!v ; P) [] Q`. The parallel operators bind tighter than choice operators, so `P [] Q | R` parses as `P [] (Q | R)`.
 
-## 3.13 Syntactic Sugar
+## 3.14 Syntactic Sugar
 
 The following are defined as syntactic sugar over core constructs:
 
@@ -500,7 +514,7 @@ The following are defined as syntactic sugar over core constructs:
 | `par(Ps)` | Fold of `\|\|\|` over process list Ps |
 | `seq(Ps)` | Fold of `;` over process list Ps |
 
-## 3.14 Well-Formedness Constraints on Syntax
+## 3.15 Well-Formedness Constraints on Syntax
 
 The following constraints are enforced syntactically or by the parser (as opposed to the type system in §4):
 
@@ -511,7 +525,7 @@ The following constraints are enforced syntactically or by the parser (as oppose
 5. **Station signature arity**: The number of input/output channels in a `StationSig` must match the service process.
 6. **Recursive process well-foundedness**: In `rec X(params). P`, the variable X must appear guarded in P (behind a channel operation, delay, or station invocation).
 
-## 3.15 Grammar Summary
+## 3.16 Grammar Summary
 
 The complete grammar comprises the following major syntactic categories:
 
@@ -519,13 +533,14 @@ The complete grammar comprises the following major syntactic categories:
 |---------|-------------------|---------|
 | Program structure | Program, TopDecl, Import | §3.2 |
 | Types | Type, BaseType, CompositeType | §3.3 |
-| Expressions | Expr, Pattern, Binding | §3.4 |
-| Processes | Process, Send, Receive, PChoice | §3.5 |
-| Stations | StationDecl, ServiceProcess | §3.6 |
-| Distributions | DistExpr, DistPrimitive | §3.7 |
-| Resources | ResourceDecl | §3.8 |
-| Arrivals | ArrivalDecl | §3.9 |
-| Assertions | AssertDecl, PerfMetric | §3.10 |
+| Channels | ChannelDecl, ChannelConfig | §3.4 |
+| Expressions | Expr, Pattern, Binding | §3.5 |
+| Processes | Process, Send, Receive, PChoice | §3.6 |
+| Stations | StationDecl, ServiceProcess | §3.7 |
+| Distributions | DistExpr, DistPrimitive | §3.8 |
+| Resources | ResourceDecl | §3.9 |
+| Arrivals | ArrivalDecl | §3.10 |
+| Assertions | AssertDecl, PerfMetric | §3.11 |
 
 This grammar defines exactly five primitive declaration forms corresponding to the five ORIE concepts:
 

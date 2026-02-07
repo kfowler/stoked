@@ -24,7 +24,7 @@ All continuous distributions produce values of type `Dist<Duration>` (or `Dist<F
 | Gamma | `Gamma(α, β)` | α, β > 0 | α/β | 1/α |
 | Weibull | `Weibull(k, λ)` | k, λ > 0 | λ·Γ(1+1/k) | see §7.5.2 |
 | Beta | `Beta(α, β)` | α, β > 0 | α/(α+β) | β/((α+β)²(α+β+1)·(α/(α+β))²) |
-| Pareto | `Pareto(α, x_m)` | α > 2, x_m > 0 | αx_m/(α-1) | 1/(α(α-2)) |
+| Pareto | `Pareto(α, x_m)` | α > 2 (finite variance), x_m > 0 | αx_m/(α-1) | 1/(α(α-2)) |
 
 **Triangular SCV:**
 ```
@@ -213,14 +213,14 @@ station BatchStation(
 
 ### 9.4.1 RetryLoop
 
-Retry a process up to n times on failure.
+Retry a process up to n times on failure. The choice to retry is an internal (system) decision after observing failure, so it uses internal choice (`|~|`) rather than external choice.
 
 ```stoked
 process RetryLoop(n: Int, body: proc, on_fail: proc) =
   if n <= 0 then
     on_fail
   else
-    body [] RetryLoop(n - 1, body, on_fail)
+    body |~| RetryLoop(n - 1, body, on_fail)
 ```
 
 **Queueing**: Creates a geometric rework loop with escape probability p_success per attempt. Expected iterations = 1/p_success, bounded by n.
@@ -270,7 +270,6 @@ process CircuitBreaker(
   threshold: Int,
   reset_time: Duration
 ) =
-  let errors = 0 in
   rec Loop(err_count: Int = 0).
     if err_count >= threshold then
       delay(Deterministic(reset_time)) ;

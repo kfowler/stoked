@@ -24,15 +24,15 @@ Throughout this specification, the following meta-variable conventions are used 
 
 | Meta-variable | Ranges over | Defined in |
 |---------------|------------|------------|
-| P, Q, R | Processes | §3.5 |
+| P, Q, R | Processes | §3.6 |
 | T, U, S | Types | §3.3 |
-| D | Distributions | §3.7 |
+| D | Distributions | §3.8 |
 | K | Kinds | §4.1 |
-| v, w | Values | §3.4 |
-| e | Expressions | §3.4 |
-| pat | Patterns | §3.4 |
-| Σ | Station definitions | §3.6 |
-| Φ | Service processes | §3.6 |
+| v, w | Values | §3.5 |
+| e | Expressions | §3.5 |
+| pat | Patterns | §3.5 |
+| Σ | Station definitions | §3.7 |
+| Φ | Service processes | §3.7 |
 
 ### 2.1.3 Semantic Domains
 
@@ -178,7 +178,7 @@ The grammar in Chapter 3 uses the following EBNF conventions:
 | `'...'` | Literal string |
 | `/* ... */` | Grammar comment |
 
-Operator precedence and associativity are defined inline with the grammar productions. Ambiguities are resolved by the precedence table in §3.8.
+Operator precedence and associativity are defined inline with the grammar productions. Ambiguities are resolved by the precedence table in §3.13.
 
 ## 2.6 Time Units
 

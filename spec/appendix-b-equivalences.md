@@ -44,7 +44,7 @@ Trace equivalence is the coarsest behavioral equivalence. It does not distinguis
 P ⊑_T Q  iff  traces(P) ⊆ traces(Q)
 ```
 
-Q trace-refines P means Q can do everything P can do (and possibly more). This is the standard CSP notion of refinement, interpreted as: Q is a more deterministic (more constrained) implementation of specification P.
+P ⊑_T Q means "P is trace-refined by Q": every trace of P is also a trace of Q. Equivalently, Q permits all behaviors that P permits (and possibly more). In specification terms, P is a tighter specification than Q.
 
 ## B.2 Bisimulation
 
@@ -134,6 +134,8 @@ P ||| Q  ~  Q ||| P                                 [Intl-Comm]
 P ||| stop  ~  P                                    [Intl-Unit]
 ```
 
+**Remark.** [Par-Unit] follows the pi-calculus convention where `stop` denotes inaction (the process `0`). An inert process composed in parallel contributes no transitions and is absorbed. This differs from CSP's `STOP`, which actively refuses all events and can block synchronizing partners. In STOKED, `stop` is inert (pi-calculus style); potential deadlock arises from *cyclic dependency*, not from a single stopped component.
+
 ### B.4.3 Laws of Choice
 
 ```
@@ -167,9 +169,11 @@ pchoice { p -> P, (1-p) -> Q }
 
 ```
 !P  ~  P | !P                                       [Repl-Unfold]
-!(P | Q)  ~  !P | !Q                                [Repl-Par]
+!(P | Q)  ~  !P | !Q     if fn(P) ∩ fn(Q) = ∅      [Repl-Par]
 !stop  ~  stop                                       [Repl-Stop]
 ```
+
+**Remark.** [Repl-Par] requires P and Q to share no free names. Without this restriction, `!(P | Q)` pairs each copy of P with a copy of Q, while `!P | !Q` allows arbitrary matchings — these are not bisimilar in general.
 
 ### B.4.7 Laws of Delay
 
@@ -199,11 +203,12 @@ Two stations with the same mean and SCV are performance-equivalent under the VUT
 ### B.4.9 Laws of Send/Receive
 
 ```
-(a ! v ; P) | (a ? x ; Q)  ≈  P | Q[v/x]            [Comm-Async]
-    (when a is a private channel with exactly this sender and receiver)
+(nu a)((a ! v ; P) | (a ? x ; Q))  ≈  (nu a)(P | Q[v/x])  [Comm-Async]
 
-(a !! v ; P) | (a ?? x ; Q)  ~  P | Q[v/x]           [Comm-Sync]
+(a !! v ; P) | (a ?? x ; Q)  ~  P | Q[v/x]                 [Comm-Sync]
 ```
+
+**Remark.** [Comm-Async] requires restriction `(nu a)` to ensure channel `a` is private with exactly one sender and one receiver. Without restriction, other parallel components could also interact with `a`.
 
 ### B.4.10 Expansion Law
 

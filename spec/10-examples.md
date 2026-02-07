@@ -243,23 +243,42 @@ Solving: λ(CodeReview) = 10/(1-0.30) = 14.29/d
 
 **Utilization** (§7.3.2):
 
+> **Note on LogNormal means:** For `LogNormal(log(m), σ)`, the *median* is m but the
+> *mean* is m · exp(σ²/2). The utilization formula ρ = λ/(c · μ) requires the mean
+> service time (1/μ), so we must use the corrected mean, not the median.
+
 ```
-ρ(BuildServer) = 14.29/d / (4 · 1/(8m)) = 14.29/(4·180/d) = 14.29/720 = 0.020
-ρ(CodeReview)  = 14.29/d / (3 · 1/(45m)) = 14.29/(3·32/d) = 14.29/96 = 0.149
-ρ(TestRunner)  = 10/d / (8 · 1/(12m)) = 10/(8·120/d) = 10/960 = 0.010
-ρ(Deployer)    = 10/d / (1 · 1/(5m)) = 10/(288/d) = 0.035
-ρ(ReworkStation) = 4.29/d / (6 · 1/(30m)) = 4.29/(6·48/d) = 4.29/288 = 0.015
+Mean service times (LogNormal correction: mean = median · exp(σ²/2)):
+  BuildServer:   8m  · exp(0.36/2) = 8m  · 1.197 ≈  9.58m
+  CodeReview:    45m · exp(0.64/2) = 45m · 1.377 ≈ 61.97m
+  TestRunner:    12m · exp(0.16/2) = 12m · 1.083 ≈ 13.00m
+  Deployer:      Triangular(2m, 5m, 15m) → mean = (2+5+15)/3 = 7.33m
+  ReworkStation: 30m · exp(0.49/2) = 30m · 1.277 ≈ 38.32m
+
+ρ(BuildServer)   = 14.29/d / (4 · 1/(9.58m))  = 14.29/(4·1440/9.58)  = 14.29/601.3  ≈ 0.024
+ρ(CodeReview)    = 14.29/d / (3 · 1/(61.97m)) = 14.29/(3·1440/61.97) = 14.29/69.7   ≈ 0.205
+ρ(TestRunner)    = 10/d    / (8 · 1/(13.00m)) = 10/(8·1440/13.00)    = 10/886.2     ≈ 0.011
+ρ(Deployer)      = 10/d    / (1 · 1/(7.33m))  = 10/(1·1440/7.33)     = 10/196.5     ≈ 0.051
+ρ(ReworkStation) = 4.29/d  / (6 · 1/(38.32m)) = 4.29/(6·1440/38.32)  = 4.29/225.4   ≈ 0.019
 ```
 
-Note: Code review has the highest utilization (0.149), confirming it as the bottleneck. In practice, the schedule constraint (business hours only) effectively doubles the utilization to ~0.30 during working hours.
+Note: Code review has the highest utilization (ρ ≈ 0.205), confirming it as the bottleneck. In practice, the schedule constraint (business hours only) effectively triples the utilization to ~0.61 during working hours.
+
+**Raw process time** (using corrected LogNormal means):
+
+```
+T₀ = E[BuildServer] + E[CodeReview] + E[TestRunner] + E[Deployer]
+   = 9.58m + 61.97m + 13.00m + 7.33m
+   ≈ 91.88m ≈ 92m
+```
 
 **Little's Law verification**:
 
 ```
 L = λ · W
 Expected WIP ≈ (10/d) · E[CT]
-With E[CT] ≈ T₀ + queueing delays ≈ 100m + delays
-L ≈ 10/d · (100m / (1440m/d)) ≈ 0.69 jobs  (steady state, low utilization)
+With E[CT] ≈ T₀ + queueing delays ≈ 92m + delays
+L ≈ 10/d · (92m / (1440m/d)) ≈ 0.64 jobs  (steady state, low utilization)
 ```
 
 ---
@@ -322,7 +341,9 @@ resource auto_remediation : Resource<10>
 // Escalation target for critical incidents
 process IncidentCommander = critical_queue ? triaged ;
   CriticalResponse(triaged) ;
-  resolved_queue ! triaged ;
+  resolved_queue ! { alert: triaged.alert, resolution: "escalated",
+                     root_cause: triaged.runbook, duration: 0m,
+                     responder: triaged.assigned_to } ;
   skip
 ```
 
@@ -384,7 +405,6 @@ station HumanEscalation : escalation_queue -> resolved_queue {
 }
 
 station InfoLogger : info_queue -> resolved_queue {
-  servers: 1
   discipline: is(∞)         // infinite server (delay), no queueing
   service_time: Deterministic(1s)
   compute {
@@ -430,7 +450,9 @@ process IncidentResponseSystem =
       acquire(oncall_engineers, 1) ;
       CriticalResponse(triaged) ;
       release(oncall_engineers, 1) ;
-      resolved_queue ! triaged ;
+      resolved_queue ! { alert: triaged.alert, resolution: "critical_resolved",
+                         root_cause: triaged.runbook, duration: 0m,
+                         responder: triaged.assigned_to } ;
       skip)
     |||
     // Warning path: auto-remediation with human fallback
@@ -446,7 +468,9 @@ process IncidentResponseSystem =
       acquire(oncall_engineers, 1) ;
       HumanEscalation(failed) ;
       release(oncall_engineers, 1) ;
-      resolved_queue ! failed ;
+      resolved_queue ! { alert: failed.alert, resolution: failed.action_taken,
+                         root_cause: "escalation", duration: failed.duration,
+                         responder: "senior_sre" } ;
       skip)
     |||
     // Info path: just log
@@ -820,13 +844,19 @@ assert littles_law(KanbanSystem)
 ### 10.3.7 Performance Analysis
 
 **Traffic equations**:
+
+> **Note on rework routing:** The process definition routes all integration
+> rework to `frontend_wip` only (a simplification). In a more realistic model,
+> rework would be dispatched to the team responsible for the failing component.
+> The equations below reflect the simplified process as written.
+
 ```
 λ(FeatureDecomposition) = 3/w
-λ(FrontendDev) = 3/w + 0.25 · 3/w = 3.75/w  (accounting for 25% integration rework)
-λ(BackendDev) = 3/w + rework ≈ 3.75/w
-λ(PlatformDev) = 3/w + rework ≈ 3.75/w
-λ(IntegrationTest) = 3/w / (1 - 0.25) = 4/w
-λ(QAValidation) = 3/w
+λ(IntegrationTest) = 3/w / (1 - 0.25) = 4/w       (rework loop: 25% fed back)
+λ(FrontendDev) = 3/w + 0.25 · λ(IntegrationTest) = 3/w + 1/w = 4/w  (new features + rework)
+λ(BackendDev) = 3/w                                 (no rework routed here)
+λ(PlatformDev) = 3/w                                (no rework routed here)
+λ(QAValidation) = 0.75 · λ(IntegrationTest) = 3/w
 λ(ReleaseDeploy) = 3/w
 ```
 

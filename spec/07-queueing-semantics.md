@@ -150,9 +150,9 @@ For stations that do not meet Jackson or BCMP conditions, STOKED uses the VUT eq
 
 ```
                     ⎛ c²ₐ + c²ₛ ⎞   ⎛  ρ^(√(2(c+1)))  ⎞
-CT_q ≈  E[S] · ⎜ ────────── ⎟ · ⎜ ──────────── ⎟
-                    ⎝      2      ⎠   ⎝    1 - ρ       ⎠
-          \_____________/   \______________/
+CT_q ≈  E[S] · ⎜ ────────── ⎟ · ⎜ ─────────────── ⎟
+                    ⎝      2      ⎠   ⎝   c · (1 - ρ)    ⎠
+          \_____________/   \________________/
                V                    U × T
           (Variability)     (Utilization × Time)
 ```
@@ -163,6 +163,8 @@ where:
 - c²ₛ = SCV of service times (service variability)
 - ρ = utilization = λ / (c · μ)
 - c = number of servers
+
+For the single-server case (c = 1), this reduces to the Kingman formula: CT_q ≈ E[S] · ((c²ₐ + c²ₛ)/2) · (ρ/(1-ρ)).
 
 **Interpretation**: Waiting time is the product of three factors:
 1. **V (Variability)**: Average of arrival and service SCVs. High variability → long waits.
@@ -252,13 +254,13 @@ s_bottleneck = argmaxₛ ρ(s)
 r_b = max_s { λ_s / c_s }    (arrival rate per server)
 ```
 
-equivalently, r_b = max_s { μ_s · ρ_s / c_s } for single-class systems.
+equivalently, r_b = max_s { μ_s · ρ_s } for single-class systems.
 
 **Performance bounds (Factory Physics):**
 
 ```
 Best Case (no variability):
-    TH_best = min(r_b · W, W / T₀)    for WIP = W
+    TH_best = min(W / T₀, r_b)        for WIP = W
     CT_best = max(T₀, W / r_b)
 
 Practical Worst Case (maximal variability):
