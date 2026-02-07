@@ -48,6 +48,8 @@ A stronger condition for channels:
 
 Condition WF-1b.3 is enforced by the resource environment merge operator ⊕ (§4.7.1).
 
+**Note.** The binary merge operator ⊕ extends to n-way parallel composition by iterated pairwise application: Δ₁ ⊕ Δ₂ ⊕ ... ⊕ Δₙ. Since ⊕ is commutative and associative (when defined), the order of merging does not matter. The key property is that `Σᵢ Δᵢ(r) ≤ capacity(r)` for all resources r — i.e., the total resource demand across all parallel components does not exceed capacity.
+
 ## 8.3 Deadlock-Freedom (WF-2)
 
 **Condition WF-2 (Deadlock-Freedom).** A STOKED system S is deadlock-free if: for every reachable configuration C (other than successful termination), at least one transition is enabled.

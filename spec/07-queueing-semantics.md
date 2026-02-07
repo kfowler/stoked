@@ -50,6 +50,8 @@ Each STOKED station is classified according to the BCMP theorem's four server ty
 | Type 3 | IS (Infinite Server / Delay) | General, class-dependent | `discipline: is(∞)` or `servers: ∞` |
 | Type 4 | LCFS-PR (Preemptive LIFO) | General, class-dependent | `discipline: lifo`, `preemptible: true` |
 
+**Note.** BCMP Type 4 requires preemptive LCFS discipline. In STOKED, this is specified by combining `discipline: lifo` with a preemptible station. The `preemptible` flag in `ResourceConfig` (§3.9) controls whether a resource holder can be preempted; for Type 4 classification, the station itself must support preemption of in-service jobs.
+
 **Definition 7.2 (BCMP Compatibility).** A STOKED system is *BCMP-compatible* if every station falls into one of the four BCMP types. BCMP-compatible systems admit product-form solutions for steady-state probabilities.
 
 ### 7.2.2 Non-BCMP Stations
@@ -204,6 +206,8 @@ c²_d = 1 + (1 - ρ²) · (c²_a - 1) + ρ² / √c · (c²_s - 1)
 ```
 
 This is the *Departure Approximation* (Whitt), used to propagate variability through the network.
+
+**Note.** This formula is exact for the single-server case (c = 1). For multi-server stations (c > 1), the `ρ² / √c` term is an approximation; more precise formulas exist (see Whitt, 1993) but the difference is small for typical utilization levels.
 
 ### 7.5.4 Network Decomposition
 

@@ -26,6 +26,8 @@ All continuous distributions produce values of type `Dist<Duration>` (or `Dist<F
 | Beta | `Beta(α, β)` | α, β > 0 | α/(α+β) | β/((α+β)²(α+β+1)·(α/(α+β))²) |
 | Pareto | `Pareto(α, x_m)` | α > 2 (finite variance), x_m > 0 | αx_m/(α-1) | 1/(α(α-2)) |
 
+**Note on Normal distribution.** When Normal(μ, σ) is used for `Dist<Duration>`, μ should be positive (μ > 0) to ensure the mean service time is meaningful. Negative samples may arise from the distribution tails; in practice, implementations should truncate or reject negative samples for Duration-typed contexts.
+
 **Triangular SCV:**
 ```
 Var = (a² + m² + b² - am - ab - mb) / 18
@@ -53,6 +55,8 @@ c² = Var / ((a+m+b)/3)²
 | Maximum | `max_of(D₁, D₂)` | max(X₁, X₂) where X₁ ~ D₁, X₂ ~ D₂ |
 | Minimum | `min_of(D₁, D₂)` | min(X₁, X₂) where X₁ ~ D₁, X₂ ~ D₂ |
 | Convolution | `convolve(D₁, D₂)` | X₁ + X₂ where X₁ ~ D₁, X₂ ~ D₂ (independent) |
+
+**Note.** The distribution combinator `shift(D, offset)` shares its name with the SPC condition `shift(metric, threshold)` (§3.6). Context disambiguates: `shift` in a `DistExpr` position is the distribution combinator; `shift` in an `SPCCondition` position is the SPC mean-shift detector.
 
 ### 9.1.4 Useful Derived Distributions
 
@@ -256,6 +260,8 @@ process FanOutFanIn(
   |[{join_ch}]|
   (join_ch ?? results ; skip)
 ```
+
+**Note.** The synchronous receive `join_ch ?? results` (rendezvous) is used instead of async receive to ensure the join completes atomically — the joining process blocks until all parallel workers have deposited their results and the join channel is ready.
 
 **Queueing**: CT = max(CT_parallel_paths) + CT_fork + CT_join. Throughput limited by slowest parallel path.
 

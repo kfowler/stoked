@@ -200,6 +200,8 @@ Distributions are covariant because STOKED distributions are immutable generator
     Chan<T> <: Chan<U>
 ```
 
+**Note.** Tuple types do not have a subtyping rule. Tuples are structurally typed but invariant in all positions, since STOKED does not distinguish covariant/contravariant tuple positions.
+
 ### 4.4.1 Numeric Coercions
 
 ```
@@ -249,7 +251,7 @@ Integer values may be used where Float is expected. This is the only implicit co
     ──────────────────────────────────────────────────────── [T-ArithFloat]
     Γ ⊢ e₁ ⊕ e₂ : Float
 
-    Γ ⊢ e₁ : T    Γ ⊢ e₂ : T    T ∈ {Int, Float, Duration}
+    Γ ⊢ e₁ : T    Γ ⊢ e₂ : T    T ∈ {Int, Float, Duration, Rate, String}
     ──────────────────────────────────────────────────────────── [T-Compare]
     Γ ⊢ e₁ < e₂ : Bool          (likewise for <=, >, >=, ==, !=)
 
@@ -272,7 +274,11 @@ Integer values may be used where Float is expected. This is the only implicit co
     Γ, x : T ⊢ e : U
     ──────────────────────────── [T-Fn]
     Γ ⊢ fn(x: T) -> e : T -> U
+```
 
+**Note.** The arrow type `T -> U` is used in the meta-language for typing functions and service processes. It does not appear as a surface syntax type constructor; function types are inferred from `fn` expressions and station service process signatures.
+
+```
     Γ ⊢ e₁ : T -> U    Γ ⊢ e₂ : T
     ─────────────────────────────── [T-App]
     Γ ⊢ e₁(e₂) : U
@@ -318,6 +324,13 @@ The stochastic let-binding `let stochastic x ~ D in e` draws a sample from distr
     ∀i. Γ ⊢ kᵢ : Tₖ    ∀i. Γ ⊢ vᵢ : Tᵥ
     ──────────────────────────────────────────────── [T-Map]
     Γ ⊢ {k₁: v₁, ..., kₙ: vₙ} : Map<Tₖ, Tᵥ>
+
+    Γ ⊢ e : T
+    ──────────────────────────────────── [T-Some]
+    Γ ⊢ Some(e) : Option<T>
+
+    ──────────────────────────────────── [T-None]
+    Γ ⊢ None : Option<T>
 ```
 
 **Note.** The [T-Tuple] rule assigns each position its own type. The [T-Set] and [T-Map] rules require homogeneous element types. The [T-Map] literal syntax overlaps with record syntax; disambiguation relies on whether field names are identifiers (records) or arbitrary expressions (maps).
@@ -682,7 +695,7 @@ The merge operator ⊕ ensures no over-allocation:
 
 The type system satisfies the standard type soundness properties with respect to the operational semantics (§5):
 
-**Theorem 4.1 (Type Preservation).** If `Γ; Δ ⊢ P : proc` and `P → P'`, then `Γ'; Δ' ⊢ P' : proc` for some Γ' ⊇ Γ and Δ' compatible with Δ.
+**Theorem 4.1 (Type Preservation).** If `Γ; Δ ⊢ P : proc` and `P → P'`, then `Γ'; Δ' ⊢ P' : proc` for some Γ' ⊇ Γ (Γ' may extend Γ with fresh bindings introduced by restriction or let) and Δ' compatible with Δ (Δ' may differ from Δ by acquire/release operations, with Δ'(r) + held(r) = capacity(r) for all resources r).
 
 **Theorem 4.2 (Progress).** If `Γ; Δ ⊢ P : proc` and P is not a value (i.e., P ≠ `skip` and P ≠ `stop`), then either P can take a step, or P is waiting on a channel communication or resource acquisition.
 

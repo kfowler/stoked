@@ -88,7 +88,7 @@ The remaining cases ([R-SeqL], [R-ParL], [R-ParR], [R-ExtL], [R-IntL], [R-IntR],
 
 **Case P = a !! v ; Q:** P is blocked until a matching `a ?? x` is available (case 2). If a matching receiver exists in a parallel component, [R-Rendezvous] fires.
 
-**Case P = P₁ ; P₂:** By IH on P₁: either P₁ steps (then [R-SeqL] applies), P₁ = skip (then [R-SeqSkip] applies), P₁ = stop (then P₁ ; P₂ is stuck — but stop ; Q is a type error by convention, as stop represents deadlock), or P₁ is blocked (P inherits the block).
+**Case P = P₁ ; P₂:** By IH on P₁: either P₁ steps (then [R-SeqL] applies), P₁ = skip (then [R-SeqSkip] applies), P₁ = stop (then stop ; P₂ ≡ stop by [SC-SeqStop], so P reduces to stop, which is a terminal process like skip), or P₁ is blocked (P inherits the block).
 
 **Case P = P₁ | P₂:** By IH on P₁ and P₂. If either can step independently, [R-ParL] or [R-ParR] applies. If both are blocked on complementary channel actions, [R-ParSync] applies. Otherwise P is blocked.
 

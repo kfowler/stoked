@@ -34,6 +34,7 @@ rework    scrap     wip       limit     discipline
 fifo      lifo      spt       edd       ps
 stochastic monitor  spc       and       or
 not
+Some      None
 ```
 
 ### 3.1.3 Literals
@@ -167,6 +168,8 @@ Expr        ::= Literal
              |  RecordExpr
              |  ListExpr
              |  TupleExpr
+             |  'Some' '(' Expr ')'                     /* option present */
+             |  'None'                                   /* option absent */
              |  '(' Expr ')'
 
 Param       ::= Ident ':' Type
@@ -241,6 +244,11 @@ Send        ::= Ident '!' Expr                                /* async send */
 
 Receive     ::= Ident '?' Pattern                             /* async receive */
              |  Ident '??' Pattern                            /* sync receive */
+```
+
+**Note.** A standalone receive `a ? x` (without a continuation process) is syntactic sugar for `a ? x ; skip`. The typing rule [T-Recv] and operational semantics [R-AsyncRecv] both require a continuation; the parser inserts `skip` implicitly.
+
+```ebnf
 
 SyncSet     ::= '{' Ident { ',' Ident } '}'
 

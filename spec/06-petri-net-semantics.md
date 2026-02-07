@@ -231,6 +231,8 @@ where ⊕_S fuses only the places corresponding to channels in the synchronizati
 
 The environment resolves external choice by enabling one branch's guard.
 
+**Remark.** The guards are formalized as follows: G(t_left) is satisfied when the *initial transition* of subnet N_P is enabled (its input places have sufficient tokens). Similarly for G(t_right). If both guards are satisfied simultaneously, the choice is resolved by the environment — the transition that fires first (determined by the external input) commits the choice. If neither guard is satisfied, the choice point waits.
+
 ### 6.4.6 Internal and Probabilistic Choice
 
 ```
@@ -421,7 +423,7 @@ Restriction hides the place corresponding to channel a from the external interfa
 
 ## 6.5 Behavioral Equivalence
 
-**Theorem 6.1 (Behavioral Equivalence).** For every well-typed STOKED process P:
+**Theorem 6.1 (Behavioral Equivalence).** For every well-typed, bounded STOKED process P (i.e., P satisfies WF-3, §8.4):
 
 ```
 traces(SOS(P)) = traces(PN(⟦P⟧))
@@ -433,6 +435,8 @@ where:
 - traces extracts the set of observable action sequences
 
 *Proof sketch*: By structural induction on P. Each case shows that the translation preserves the enabling conditions and firing effects of every reduction rule. See Appendix A for the complete proof sketch.
+
+**Remark.** For unbounded processes (e.g., those using unrestricted replication `!P` without WIP limits), the equivalence holds at each finite unfolding depth. The full trace equivalence requires that the Petri net analysis uses the parameterized replication construct (§6.4.8) or is restricted to a finite-depth unfolding.
 
 **Corollary 6.1.** If ⟦P⟧ is deadlock-free (every reachable marking enables at least one transition), then P is deadlock-free under the operational semantics.
 
@@ -451,7 +455,7 @@ A P-invariant y satisfies: for all reachable markings M, y^T · M = y^T · M₀ 
 | Server conservation (station s) | y(p_idle(s)) + y(p_busy(s)) = c |
 | Resource conservation (resource r) | y(p_r) + Σ_s y(p_held(s,r)) = capacity(r) |
 | WIP conservation (closed system) | Σ_a y(p_a) + Σ_s y(p_busy(s)) = W_0 |
-| Flow balance (station s) | tokens_in(s) = tokens_out(s) + tokens_rework(s) + tokens_scrap(s) |
+| Flow balance (station s) | Σ_{p ∈ inputs(s)} y(p) = Σ_{p ∈ outputs(s)} y(p) (derived from the incidence matrix, not a P-invariant itself but a consequence of conservation) |
 
 **Theorem 6.2 (Conservation).** For every well-formed STOKED system S (§8.5), the translated net ⟦S⟧ has a positive P-invariant covering all places, implying S is bounded and conservative.
 

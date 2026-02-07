@@ -169,23 +169,21 @@ process CICDPipeline =
     // Build -> Review -> Test -> Deploy (with rework)
     (!( build_queue ? pr ;
         acquire(build_agents, 1) ;
-        BuildServer(pr) ;
+        BuildServer(pr) ;                      // deposits BuildResult on review_queue
         release(build_agents, 1) ;
-        review_queue ! pr ;
 
+        review_queue ? build_result ;           // receive BuildResult
         acquire(review_capacity, 1) ;
-        CodeReview(pr) ;
+        CodeReview(build_result) ;              // deposits ReviewResult on test_queue
         release(review_capacity, 1) ;
-
         // Rework loop handled by CodeReview's yield/rework config
-        // Good output flows to test_queue automatically
 
         test_queue ? reviewed_pr ;
-        TestRunner(reviewed_pr) ;
+        TestRunner(reviewed_pr) ;               // deposits TestResult on deploy_queue
 
         deploy_queue ? tested_pr ;
         acquire(deploy_slots, 1) ;
-        Deployer(tested_pr) ;
+        Deployer(tested_pr) ;                   // deposits DeployResult on done_queue
         release(deploy_slots, 1) ;
         skip ))
     |||
@@ -533,6 +531,8 @@ P(Critical) = 0.10, P(Warning) = 0.60, P(Info) = 0.30
 λ(InfoLogger) = 30/d
 λ(HumanEscalation) = 0.20 · 60/d = 12/d
 ```
+
+**Note.** The routing probabilities arise from the severity distribution of incoming alerts, not from an explicit `pchoice`. The `match alert.severity` in the process definition is deterministic routing based on the alert's data field. The probabilities P(Critical) = 0.10, P(Warning) = 0.60, P(Info) = 0.30 reflect the assumed severity distribution of the arrival population. In a complete specification, this would be declared as a job class distribution in the arrival declaration.
 
 **Utilization**:
 ```

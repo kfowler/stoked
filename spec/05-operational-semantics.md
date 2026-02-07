@@ -84,7 +84,7 @@ stop ; P  ≡  stop                                    [SC-SeqStop]
 
 /* Choice */
 P [] Q  ≡  Q [] P                                  [SC-ExtComm]
-P |~| Q  ≡  Q |~| P                                [SC-IntComm2]
+P |~| Q  ≡  Q |~| P                                [SC-IntChoiceComm]
 ```
 
 where fn(P) denotes the set of free channel names in P.
@@ -115,6 +115,8 @@ where fn(P) denotes the set of free channel names in P.
 ```
 
 **Remark**: Async send enqueues; async receive dequeues from the head (FIFO by default). The discipline can be overridden per-channel.
+
+Channel-level discipline overrides (via `ChannelConfig`) are respected by the dequeue operation: if a channel is configured with `priority` discipline, `a ? x` receives the highest-priority element rather than the FIFO head.
 
 ### 5.4.3 Channel Communication (Synchronous / Rendezvous)
 
@@ -175,7 +177,7 @@ A station fires when:
 
 ### 5.4.6 Parallel Composition
 
-**Synchronized parallel** (P | Q): both components can proceed independently on non-shared actions; they must synchronize on shared channel actions.
+**Synchronized parallel** (P | Q): both components can proceed independently on non-shared actions; they must synchronize on shared channel actions. A channel a is *shared* between P and Q if a ∈ fn(P) ∩ fn(Q) — i.e., a appears free in both components.
 
 ```
     ⟨P, σ, β, ρ, t⟩ →_μ ⟨P', σ', β', ρ', t'⟩    μ ≠ a!v, a?v for shared a
@@ -209,9 +211,10 @@ A station fires when:
     ──────────────────────────────────────────────────────────── [R-AlphaIndep]
     ⟨P |[S]| Q, σ, β, ρ, t⟩ →_μ ⟨P' |[S]| Q, σ', β', ρ', t'⟩
 
-    ⟨P, σ, β, ρ, t⟩ →_{a!v} ⟨P', ...⟩    ⟨Q, σ, β, ρ, t⟩ →_{a?v} ⟨Q', ...⟩    a ∈ S
-    ─────────────────────────────────────────────────────────────────────────────── [R-AlphaSync]
-    ⟨P |[S]| Q, σ, β, ρ, t⟩ →_τ ⟨P' |[S]| Q', ...⟩
+    ⟨P, σ, β, ρ, t⟩ →_{a!v} ⟨P', σ₁, β₁, ρ, t⟩
+    ⟨Q, σ, β, ρ, t⟩ →_{a?v} ⟨Q', σ₂, β₂, ρ, t⟩    a ∈ S
+    ──────────────────────────────────────────────────────────── [R-AlphaSync]
+    ⟨P |[S]| Q, σ, β, ρ, t⟩ →_τ ⟨P' |[S]| Q', σ₁∪σ₂, β, ρ, t⟩
 ```
 
 ### 5.4.7 Choice
@@ -351,6 +354,8 @@ Replication unfolds by structural congruence [SC-Repl].
 ```
 
 Recursion unfolds by substituting the recursive definition for X and binding the parameters.
+
+**Note.** When `rec X(x₁ : T₁ = d₁, ..., xₙ : Tₙ = dₙ). P` has default values, the initial unfolding uses the defaults: `P[rec X(x̄). P / X][d̄/x̄]`. Subsequent recursive calls `X(v̄)` use the provided arguments, overriding defaults.
 
 ### 5.4.14 Process Invocation
 
