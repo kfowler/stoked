@@ -264,7 +264,7 @@ BASE_TEMPLATE = Template(dedent("""\
 
 
 INDEX_CONTENT = dedent("""\
-# STOKED: Process Algebra for eXtensible Industrial Systems
+# STOKED: Stochastic Typed Operations Kit for Engineering Delivery
 
 **Version 0.1.0** — Draft Specification
 
@@ -366,7 +366,7 @@ in process algebra, Petri nets, and queueing theory.
 
 ## Abstract
 
-We introduce STOKED (Process Algebra for eXtensible Industrial Systems), a formal
+We introduce STOKED (Stochastic Typed Operations Kit for Engineering Delivery), a formal
 specification language for describing production systems in which workstations are
 LLM-based agents, deterministic computations, or human task queues, and jobs are
 software artifacts flowing through a queueing network. STOKED provides a unified
