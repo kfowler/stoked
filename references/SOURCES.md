@@ -1,6 +1,6 @@
 # Reference Sources
 
-All references cited in the PRAXIS white paper are real, published academic works.
+All references cited in the STOKED white paper are real, published academic works.
 PDFs are included where freely/openly available. For others, access URLs are provided.
 
 ## Included PDFs

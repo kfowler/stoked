@@ -1,10 +1,10 @@
-# PRAXIS Language Specification
+# STOKED Language Specification
 
 ## Chapter 6 — Petri Net Semantics
 
 ---
 
-This chapter defines the translation ⟦·⟧ from PRAXIS processes to Coloured Generalized Stochastic Petri Nets (CGSPNs). The Petri net semantics provides a structural model suitable for analysis of boundedness, liveness, deadlock-freedom, conservation, and steady-state performance.
+This chapter defines the translation ⟦·⟧ from STOKED processes to Coloured Generalized Stochastic Petri Nets (CGSPNs). The Petri net semantics provides a structural model suitable for analysis of boundedness, liveness, deadlock-freedom, conservation, and steady-state performance.
 
 ## 6.1 Target Formalism: CGSPNs
 
@@ -38,9 +38,9 @@ M'(p) = M(p) - E(p,t)(b) + E(t,p)(b)    for all p ∈ P
 
 ## 6.2 Translation Overview
 
-The translation ⟦·⟧ maps each PRAXIS construct to a CGSPN subnet, with *interface places* for composition. The key correspondences are:
+The translation ⟦·⟧ maps each STOKED construct to a CGSPN subnet, with *interface places* for composition. The key correspondences are:
 
-| PRAXIS Construct | Petri Net Element |
+| STOKED Construct | Petri Net Element |
 |-----------------|-------------------|
 | Channel `a : Chan<T>` | Place p_a with color set C(T) |
 | Station `s` | Transition subnet (input place → timed transition → output place) |
@@ -56,9 +56,9 @@ The translation ⟦·⟧ maps each PRAXIS construct to a CGSPN subnet, with *int
 ⟦channel a : Chan<T>⟧ = place p_a with C(p_a) = ⟦T⟧
 ```
 
-The color set ⟦T⟧ maps PRAXIS types to Petri net color sets:
+The color set ⟦T⟧ maps STOKED types to Petri net color sets:
 
-| PRAXIS Type | Color Set |
+| STOKED Type | Color Set |
 |------------|-----------|
 | `Bool` | {true, false} |
 | `Int` | ℤ |
@@ -378,7 +378,7 @@ In practice, replication is bounded by resource constraints or WIP limits, yield
 
 ## 6.5 Behavioral Equivalence
 
-**Theorem 6.1 (Behavioral Equivalence).** For every well-typed PRAXIS process P:
+**Theorem 6.1 (Behavioral Equivalence).** For every well-typed STOKED process P:
 
 ```
 traces(SOS(P)) = traces(PN(⟦P⟧))
@@ -401,16 +401,16 @@ where:
 
 A P-invariant y satisfies: for all reachable markings M, y^T · M = y^T · M₀ (weighted token count is conserved).
 
-**Application to PRAXIS:**
+**Application to STOKED:**
 
-| PRAXIS Property | P-Invariant |
+| STOKED Property | P-Invariant |
 |----------------|-------------|
 | Server conservation (station s) | y(p_idle(s)) + y(p_busy(s)) = c |
 | Resource conservation (resource r) | y(p_r) + Σ_s y(p_held(s,r)) = capacity(r) |
 | WIP conservation (closed system) | Σ_a y(p_a) + Σ_s y(p_busy(s)) = W_0 |
 | Flow balance (station s) | tokens_in(s) = tokens_out(s) + tokens_rework(s) + tokens_scrap(s) |
 
-**Theorem 6.2 (Conservation).** For every well-formed PRAXIS system S (§8.5), the translated net ⟦S⟧ has a positive P-invariant covering all places, implying S is bounded and conservative.
+**Theorem 6.2 (Conservation).** For every well-formed STOKED system S (§8.5), the translated net ⟦S⟧ has a positive P-invariant covering all places, implying S is bounded and conservative.
 
 ## 6.7 Siphons and Traps
 

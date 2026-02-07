@@ -1,10 +1,10 @@
-# PRAXIS Language Specification
+# STOKED Language Specification
 
 ## Chapter 3 — Abstract Syntax
 
 ---
 
-This chapter defines the complete abstract syntax of PRAXIS using Extended Backus-Naur Form (EBNF). All subsequent chapters reference the grammar defined here. See §2.5 for EBNF conventions.
+This chapter defines the complete abstract syntax of STOKED using Extended Backus-Naur Form (EBNF). All subsequent chapters reference the grammar defined here. See §2.5 for EBNF conventions.
 
 ## 3.1 Lexical Structure
 
@@ -195,7 +195,7 @@ UnOp        ::= '-' | 'not'
 
 ## 3.5 Process Expressions
 
-This is the core of PRAXIS. Process expressions describe the control flow and communication structure of a production system.
+This is the core of STOKED. Process expressions describe the control flow and communication structure of a production system.
 
 ```ebnf
 ProcessDecl ::= 'process' Ident [ '(' [ Param { ',' Param } ] ')' ] '=' Process
@@ -357,7 +357,7 @@ StationInvoke
 
 ## 3.7 Distribution Expressions
 
-Distributions are first-class in PRAXIS. They appear in five positions: arrival rates, service times, yield/quality, routing probabilities, and stochastic let-bindings.
+Distributions are first-class in STOKED. They appear in five positions: arrival rates, service times, yield/quality, routing probabilities, and stochastic let-bindings.
 
 ```ebnf
 DistExpr    ::= DistPrimitive

@@ -1,4 +1,4 @@
-# PRAXIS Language Specification
+# STOKED Language Specification
 
 ## Chapter 2 — Notation and Conventions
 
@@ -92,7 +92,7 @@ The specification uses the following judgment forms.
 
 | Convention | Usage | Example |
 |-----------|-------|---------|
-| `monospace` | PRAXIS keywords, syntax, code | `station`, `channel`, `P ; Q` |
+| `monospace` | STOKED keywords, syntax, code | `station`, `channel`, `P ; Q` |
 | *italic* | Meta-variables, first use of defined terms | *process*, *station*, T |
 | **bold** | Defined names, emphasis | **Definition 4.1** |
 | SMALL CAPS | Rule names | [T-Send], [R-Comm] |
@@ -102,7 +102,7 @@ The specification uses the following judgment forms.
 
 | Notation | Meaning |
 |----------|---------|
-| `{ ... }` | PRAXIS block syntax |
+| `{ ... }` | STOKED block syntax |
 | ⟨ ... ⟩ | Tuples and sequences |
 | ⟦ ... ⟧ | Semantic translation brackets |
 | ⌈ ... ⌉ | Ceiling |
@@ -182,7 +182,7 @@ Operator precedence and associativity are defined inline with the grammar produc
 
 ## 2.6 Time Units
 
-PRAXIS supports the following time unit literals:
+STOKED supports the following time unit literals:
 
 | Unit | Abbreviation | Equivalent |
 |------|-------------|------------|

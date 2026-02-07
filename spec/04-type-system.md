@@ -1,14 +1,14 @@
-# PRAXIS Language Specification
+# STOKED Language Specification
 
 ## Chapter 4 — Type System
 
 ---
 
-This chapter defines the type system of PRAXIS: the kind system, type universe, subtyping relation, and typing judgments for expressions, processes, stations, and distributions.
+This chapter defines the type system of STOKED: the kind system, type universe, subtyping relation, and typing judgments for expressions, processes, stations, and distributions.
 
 ## 4.1 Kinds
 
-Every type in PRAXIS is classified by a *kind*. Kinds prevent ill-formed type expressions.
+Every type in STOKED is classified by a *kind*. Kinds prevent ill-formed type expressions.
 
 ```
 K ::= Type                    -- the kind of value types
@@ -61,7 +61,7 @@ K ::= Type                    -- the kind of value types
 
 ## 4.2 Type Universe
 
-The complete type universe of PRAXIS is organized in four layers:
+The complete type universe of STOKED is organized in four layers:
 
 ### 4.2.1 Base Types
 
@@ -115,7 +115,7 @@ The complete type universe of PRAXIS is organized in four layers:
 τ_proc ::= proc                                 -- the type of processes
 ```
 
-All well-typed process expressions have type `proc`. The process type does not carry additional information in this version of PRAXIS; behavioral properties are verified by the well-formedness conditions (§8) rather than encoded in the type.
+All well-typed process expressions have type `proc`. The process type does not carry additional information in this version of STOKED; behavioral properties are verified by the well-formedness conditions (§8) rather than encoded in the type.
 
 ## 4.3 Type Environments
 
@@ -143,7 +143,7 @@ A *type environment* Γ is a finite ordered sequence of bindings:
 
 ## 4.4 Subtyping
 
-PRAXIS has structural subtyping for records (width and depth) and nominal subtyping for variants.
+STOKED has structural subtyping for records (width and depth) and nominal subtyping for variants.
 
 ```
 ─────────── [Sub-Refl]
@@ -189,7 +189,7 @@ T <: T
 Int <: Float
 ```
 
-Integer values may be used where Float is expected. This is the only implicit coercion in PRAXIS.
+Integer values may be used where Float is expected. This is the only implicit coercion in STOKED.
 
 ## 4.5 Typing Judgments for Expressions
 

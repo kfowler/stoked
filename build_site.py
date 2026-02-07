@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Build a high-quality, browseable static website for the PRAXIS specification.
+Build a high-quality, browseable static website for the STOKED specification.
 
 Usage:
     uv run build_site.py
@@ -67,7 +67,7 @@ BASE_TEMPLATE = Template(dedent("""\
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ title }} — PRAXIS Specification</title>
+  <title>{{ title }} — STOKED Specification</title>
   <style>
     :root {
       --bg: #ffffff;
@@ -221,7 +221,7 @@ BASE_TEMPLATE = Template(dedent("""\
   <div class="layout">
     <aside class="sidebar">
       <div class="sidebar-header">
-        <h1>PRAXIS</h1>
+        <h1>STOKED</h1>
         <div class="version">v0.1.0 — Specification</div>
       </div>
       <nav>
@@ -254,7 +254,7 @@ BASE_TEMPLATE = Template(dedent("""\
       </div>
       {% endif %}
       <div class="footer">
-        PRAXIS Specification v0.1.0 &mdash; Process Algebra for eXtensible Industrial Systems
+        STOKED Specification v0.1.0 &mdash; Process Algebra for eXtensible Industrial Systems
       </div>
     </main>
   </div>
@@ -264,19 +264,19 @@ BASE_TEMPLATE = Template(dedent("""\
 
 
 INDEX_CONTENT = dedent("""\
-# PRAXIS: Process Algebra for eXtensible Industrial Systems
+# STOKED: Process Algebra for eXtensible Industrial Systems
 
 **Version 0.1.0** — Draft Specification
 
 ---
 
-## What is PRAXIS?
+## What is STOKED?
 
-PRAXIS is a formal specification language for describing production systems in which
+STOKED is a formal specification language for describing production systems in which
 workstations are LLM-based agents, deterministic computations, or human task queues,
 and jobs are software artifacts flowing through a queueing network.
 
-Every PRAXIS program has two formal interpretations:
+Every STOKED program has two formal interpretations:
 
 - **Control-flow** via Coloured Generalized Stochastic Petri Nets (CGSPNs)
 - **Performance** via queueing network extraction (Jackson, BCMP, VUT)
@@ -315,7 +315,7 @@ Every PRAXIS program has two formal interpretations:
 
 ## White Paper
 
-The [PRAXIS white paper](whitepaper.html) provides a concise academic introduction
+The [STOKED white paper](whitepaper.html) provides a concise academic introduction
 with full references to the foundational literature.
 
 ## Quick Example
@@ -354,9 +354,9 @@ assert deadlock_free(Pipeline)
 
 
 WHITEPAPER_PAGE = dedent("""\
-# PRAXIS White Paper
+# STOKED White Paper
 
-The PRAXIS white paper provides a concise academic introduction to the language,
+The STOKED white paper provides a concise academic introduction to the language,
 covering its formal foundations, design decisions, and relationship to existing work
 in process algebra, Petri nets, and queueing theory.
 
@@ -366,10 +366,10 @@ in process algebra, Petri nets, and queueing theory.
 
 ## Abstract
 
-We introduce PRAXIS (Process Algebra for eXtensible Industrial Systems), a formal
+We introduce STOKED (Process Algebra for eXtensible Industrial Systems), a formal
 specification language for describing production systems in which workstations are
 LLM-based agents, deterministic computations, or human task queues, and jobs are
-software artifacts flowing through a queueing network. PRAXIS provides a unified
+software artifacts flowing through a queueing network. STOKED provides a unified
 formal model: every program has both a control-flow interpretation via Coloured
 Generalized Stochastic Petri Nets and a performance interpretation via queueing
 network extraction. The language inherits compositional reasoning from CSP and the

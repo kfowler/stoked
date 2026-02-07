@@ -1,14 +1,14 @@
-# PRAXIS Language Specification
+# STOKED Language Specification
 
 ## Chapter 7 — Queueing Semantics
 
 ---
 
-This chapter defines the queueing model extraction function Q(·) that maps PRAXIS systems to queueing network models. The queueing semantics provides the performance analysis framework: throughput, cycle time, utilization, WIP bounds, and bottleneck identification.
+This chapter defines the queueing model extraction function Q(·) that maps STOKED systems to queueing network models. The queueing semantics provides the performance analysis framework: throughput, cycle time, utilization, WIP bounds, and bottleneck identification.
 
 ## 7.1 Queueing Model Extraction
 
-**Definition 7.1 (Queueing Model).** The queueing model extracted from a PRAXIS system is a tuple:
+**Definition 7.1 (Queueing Model).** The queueing model extracted from a STOKED system is a tuple:
 
 ```
 Q(S) = (Nodes, Classes, Arrivals, Routing, Service, Capacities)
@@ -39,18 +39,18 @@ Q(pchoice { w₁ -> (b₁ ! x), ..., wₙ -> (bₙ ! x) } after station s) =
 
 ## 7.2 Station Classification
 
-Each PRAXIS station is classified according to the BCMP theorem's four server types, based on its service discipline and service time distribution:
+Each STOKED station is classified according to the BCMP theorem's four server types, based on its service discipline and service time distribution:
 
 ### 7.2.1 BCMP Type Classification
 
-| BCMP Type | Discipline | Service Distribution | PRAXIS Station Config |
+| BCMP Type | Discipline | Service Distribution | STOKED Station Config |
 |-----------|-----------|---------------------|----------------------|
 | Type 1 | FCFS (FIFO) | Exponential, class-independent | `discipline: fifo`, `service_time: Exponential(μ)` |
 | Type 2 | PS (Processor Sharing) | General, class-dependent | `discipline: ps` |
 | Type 3 | IS (Infinite Server / Delay) | General, class-dependent | `discipline: is(∞)` or `servers: ∞` |
 | Type 4 | LCFS-PR (Preemptive LIFO) | General, class-dependent | `discipline: lifo`, `preemptible: true` |
 
-**Definition 7.2 (BCMP Compatibility).** A PRAXIS system is *BCMP-compatible* if every station falls into one of the four BCMP types. BCMP-compatible systems admit product-form solutions for steady-state probabilities.
+**Definition 7.2 (BCMP Compatibility).** A STOKED system is *BCMP-compatible* if every station falls into one of the four BCMP types. BCMP-compatible systems admit product-form solutions for steady-state probabilities.
 
 ### 7.2.2 Non-BCMP Stations
 
@@ -58,7 +58,7 @@ Stations with non-standard configurations (e.g., SPT discipline, batch processin
 
 ## 7.3 Open Network Analysis (Jackson Networks)
 
-**Definition 7.3 (Jackson Network Conditions).** A PRAXIS system forms a Jackson network if:
+**Definition 7.3 (Jackson Network Conditions).** A STOKED system forms a Jackson network if:
 1. All arrivals are Poisson (exponential inter-arrival times)
 2. All service times are exponential
 3. All stations use FIFO discipline
@@ -102,9 +102,9 @@ C(c, a) = (aᶜ/c!) · (1/(1-a/c)) / (Σₖ₌₀ᶜ⁻¹ aᵏ/k! + (aᶜ/c!) ·
 
 ## 7.4 Closed Network Analysis (MVA)
 
-For closed PRAXIS systems (no external arrivals; fixed WIP), Mean Value Analysis computes exact performance metrics.
+For closed STOKED systems (no external arrivals; fixed WIP), Mean Value Analysis computes exact performance metrics.
 
-**Definition 7.4 (Closed System).** A PRAXIS system is closed if it has no `arrival` declarations and the total WIP is fixed by initial channel contents and WIP limits.
+**Definition 7.4 (Closed System).** A STOKED system is closed if it has no `arrival` declarations and the total WIP is fixed by initial channel contents and WIP limits.
 
 ### 7.4.1 MVA Algorithm
 
@@ -142,7 +142,7 @@ For population vector n = (n₁, ..., nₘ) over m classes:
 
 ## 7.5 GI/G/c Approximations (VUT Equation)
 
-For stations that do not meet Jackson or BCMP conditions, PRAXIS uses the VUT equation from Factory Physics to approximate expected waiting times.
+For stations that do not meet Jackson or BCMP conditions, STOKED uses the VUT equation from Factory Physics to approximate expected waiting times.
 
 ### 7.5.1 The VUT Equation
 
@@ -220,7 +220,7 @@ For a general network, performance is computed by iterating:
 
 ## 7.6 Little's Law as Invariant
 
-**Theorem 7.2 (Little's Law).** For any stable PRAXIS (sub)system S in steady state:
+**Theorem 7.2 (Little's Law).** For any stable STOKED (sub)system S in steady state:
 
 ```
 L = λ · W
@@ -231,7 +231,7 @@ where:
 - λ = throughput of S (average arrival rate = average departure rate at steady state)
 - W = E[Cycle Time through S] (average time a job spends in the system)
 
-**Application in PRAXIS**: Little's Law holds at every level:
+**Application in STOKED**: Little's Law holds at every level:
 - **System-wide**: WIP_total = TH_system × CT_system
 - **Per-station**: WIP_station = TH_station × CT_station
 - **Per-queue**: L_q = λ × W_q
@@ -315,7 +315,7 @@ where E[B] is the expected batch size, determined by the batch formation process
 
 The queueing model extraction and the Petri net translation are consistent:
 
-**Theorem 7.3 (Performance Consistency).** For a PRAXIS system S:
+**Theorem 7.3 (Performance Consistency).** For a STOKED system S:
 
 ```
 TH(Q(S)) = TH(CTMC(⟦S⟧))

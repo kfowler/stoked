@@ -1,14 +1,14 @@
-# PRAXIS Language Specification
+# STOKED Language Specification
 
 ## Chapter 8 — Well-Formedness Conditions
 
 ---
 
-This chapter defines the well-formedness conditions that a PRAXIS system must satisfy beyond type correctness. These conditions ensure that the system has meaningful operational, structural, and performance properties. Each condition is stated formally and linked to both the Petri net analysis (§6) and queueing analysis (§7) that can verify it.
+This chapter defines the well-formedness conditions that a STOKED system must satisfy beyond type correctness. These conditions ensure that the system has meaningful operational, structural, and performance properties. Each condition is stated formally and linked to both the Petri net analysis (§6) and queueing analysis (§7) that can verify it.
 
 ## 8.1 Overview
 
-A PRAXIS system S is *well-formed* if it satisfies all of the following:
+A STOKED system S is *well-formed* if it satisfies all of the following:
 
 | # | Condition | Static/Dynamic | Verification Method |
 |---|-----------|---------------|---------------------|
@@ -23,7 +23,7 @@ A PRAXIS system S is *well-formed* if it satisfies all of the following:
 
 ## 8.2 Type Safety (WF-1)
 
-**Condition WF-1.** A PRAXIS system S is type-safe if:
+**Condition WF-1.** A STOKED system S is type-safe if:
 1. Every top-level declaration is well-typed under the global environment Γ_S.
 2. Type preservation holds: if `Γ; Δ ⊢ P : proc` and P → P', then `Γ'; Δ' ⊢ P' : proc`.
 3. Progress holds: every well-typed, non-terminal process can take a step or is waiting on a communication/resource.
@@ -50,7 +50,7 @@ Condition WF-1b.3 is enforced by the resource environment merge operator ⊕ (§
 
 ## 8.3 Deadlock-Freedom (WF-2)
 
-**Condition WF-2 (Deadlock-Freedom).** A PRAXIS system S is deadlock-free if: for every reachable configuration C (other than successful termination), at least one transition is enabled.
+**Condition WF-2 (Deadlock-Freedom).** A STOKED system S is deadlock-free if: for every reachable configuration C (other than successful termination), at least one transition is enabled.
 
 Formally, using the Petri net translation:
 
@@ -80,7 +80,7 @@ This assertion requires WF-2. A conforming implementation must verify deadlock-f
 
 ## 8.4 Boundedness (WF-3)
 
-**Condition WF-3 (Boundedness).** A PRAXIS system S is *k-bounded* if no channel (place in ⟦S⟧) accumulates more than k tokens:
+**Condition WF-3 (Boundedness).** A STOKED system S is *k-bounded* if no channel (place in ⟦S⟧) accumulates more than k tokens:
 
 ```
 ∀M ∈ Reach(⟦S⟧). ∀p ∈ P. M(p) ≤ k
@@ -94,7 +94,7 @@ This assertion requires WF-2. A conforming implementation must verify deadlock-f
 
 ### 8.4.2 Ensuring Boundedness
 
-Boundedness is ensured by a positive P-invariant covering all places (Theorem 6.2). PRAXIS systems ensure this when:
+Boundedness is ensured by a positive P-invariant covering all places (Theorem 6.2). STOKED systems ensure this when:
 
 1. Every channel has a finite `capacity` declaration, OR
 2. The system is closed (no external arrivals), OR
@@ -107,7 +107,7 @@ assert bounded(S, k)
 
 ## 8.5 Conservation / Flow Balance (WF-4)
 
-**Condition WF-4 (Conservation).** A PRAXIS system S satisfies conservation if the weighted sum of tokens is constant across all reachable markings:
+**Condition WF-4 (Conservation).** A STOKED system S satisfies conservation if the weighted sum of tokens is constant across all reachable markings:
 
 ```
 ∃y > 0. ∀M ∈ Reach(⟦S⟧). y^T · M = y^T · M₀
@@ -182,7 +182,7 @@ where k_s(r) is the number of units of r required by station s, and the max is o
 
 ## 8.8 Stability (WF-7)
 
-**Condition WF-7 (Stability).** An open PRAXIS system (with external arrivals) is *stable* if every station's utilization is strictly less than 1:
+**Condition WF-7 (Stability).** An open STOKED system (with external arrivals) is *stable* if every station's utilization is strictly less than 1:
 
 ```
 ∀ station s. ρ(s) = λ(s) / (c(s) · μ(s)) < 1
@@ -224,9 +224,9 @@ The stability condition becomes ρ_eff(s) < 1, which is more restrictive than th
 
 ## 8.10 Combined Well-Formedness
 
-**Definition 8.1 (Well-Formed System).** A PRAXIS system S is *well-formed* if it satisfies WF-1 through WF-8.
+**Definition 8.1 (Well-Formed System).** A STOKED system S is *well-formed* if it satisfies WF-1 through WF-8.
 
-**Definition 8.2 (Performance-Analyzable System).** A well-formed PRAXIS system S is *performance-analyzable* if additionally:
+**Definition 8.2 (Performance-Analyzable System).** A well-formed STOKED system S is *performance-analyzable* if additionally:
 1. All distributions have finite mean and variance (so SCV is defined).
 2. The system is stable (WF-7).
 3. The routing graph is connected (every station is reachable from some arrival).

@@ -1,10 +1,10 @@
-# PRAXIS Language Specification
+# STOKED Language Specification
 
 ## Chapter 9 — Standard Library
 
 ---
 
-This chapter defines the standard library of PRAXIS: built-in distributions, queue disciplines, common station patterns, common process patterns, and built-in performance analysis functions. All standard library entities are available without explicit import.
+This chapter defines the standard library of STOKED: built-in distributions, queue disciplines, common station patterns, common process patterns, and built-in performance analysis functions. All standard library entities are available without explicit import.
 
 ## 9.1 Built-In Distributions
 
@@ -56,7 +56,7 @@ c² = Var / ((a+m+b)/3)²
 
 ### 9.1.4 Useful Derived Distributions
 
-```praxis
+```stoked
 // Bimodal service time (fast path + slow path)
 let bimodal_service = mix(
   0.8: LogNormal(log(5m), 0.3),   // 80% fast
@@ -91,7 +91,7 @@ let bounded_service = truncate(LogNormal(log(15m), 0.8), 1m, 1h)
 
 A station with infinite servers — every job starts service immediately (no queueing). Models pure delays like network latency, cool-down periods, or SLA wait times.
 
-```praxis
+```stoked
 station Delay(name: String, time: Dist<Duration>)
   : in -> out
 {
@@ -110,7 +110,7 @@ station Delay(name: String, time: Dist<Duration>)
 
 A station that inspects items and routes them by quality. Models code review, QA testing, or automated validation.
 
-```praxis
+```stoked
 station Inspect(
   pass_rate: Float,
   rework_target: Chan<T>
@@ -133,7 +133,7 @@ station Inspect(
 
 Splits a single input into multiple parallel outputs. Models decomposition tasks like breaking a feature into subtasks.
 
-```praxis
+```stoked
 station Fork(n: Int) : input -> (out_1, ..., out_n) {
   servers: 1
   discipline: fifo
@@ -149,7 +149,7 @@ station Fork(n: Int) : input -> (out_1, ..., out_n) {
 
 Waits for all inputs to arrive, then produces a single combined output. Models synchronization points like "all tests pass" or "all approvals received."
 
-```praxis
+```stoked
 station Join(n: Int) : (in_1, ..., in_n) -> output {
   servers: 1
   discipline: fifo
@@ -167,7 +167,7 @@ station Join(n: Int) : (in_1, ..., in_n) -> output {
 
 A station with explicit WIP limit, providing backpressure. When WIP reaches the limit, upstream stations are blocked.
 
-```praxis
+```stoked
 station KanbanStation(
   wip_cap: Int,
   service: Dist<Duration>
@@ -190,7 +190,7 @@ station KanbanStation(
 
 A station that accumulates items and processes them in batches. Models batch builds, bulk deployments, or grouped reviews.
 
-```praxis
+```stoked
 station BatchStation(
   min_batch: Int,
   max_batch: Int,
@@ -215,7 +215,7 @@ station BatchStation(
 
 Retry a process up to n times on failure.
 
-```praxis
+```stoked
 process RetryLoop(n: Int, body: proc, on_fail: proc) =
   if n <= 0 then
     on_fail
@@ -229,7 +229,7 @@ process RetryLoop(n: Int, body: proc, on_fail: proc) =
 
 Sequential chain of stations.
 
-```praxis
+```stoked
 process Pipeline(stages: List<proc>) =
   match stages {
     [] => skip,
@@ -244,7 +244,7 @@ process Pipeline(stages: List<proc>) =
 
 Parallel execution of n copies, then join.
 
-```praxis
+```stoked
 process FanOutFanIn(
   split_ch: Chan<T>,
   work_chs: List<Chan<T>>,
@@ -263,7 +263,7 @@ process FanOutFanIn(
 
 Stop sending work to a station if it exceeds error/latency thresholds.
 
-```praxis
+```stoked
 process CircuitBreaker(
   target: proc,
   fallback: proc,
@@ -285,7 +285,7 @@ process CircuitBreaker(
 
 Throttle arrivals to a maximum rate.
 
-```praxis
+```stoked
 process RateLimiter(max_rate: Rate, downstream: proc) =
   rec Throttle().
     delay(Deterministic(1/max_rate)) ;
@@ -325,7 +325,7 @@ These functions are available in `assert` declarations and expressions.
 
 Cycle time and wait time metrics support percentile accessors:
 
-```praxis
+```stoked
 cycle_time(S).mean      // E[CT]
 cycle_time(S).p50       // median
 cycle_time(S).p90       // 90th percentile
@@ -347,7 +347,7 @@ cycle_time(S).max       // maximum (may be ∞ for unbounded distributions)
 
 ## 9.6 Time and Rate Arithmetic
 
-```praxis
+```stoked
 // Time literals and arithmetic
 let build_time = 5m
 let review_time = 30m

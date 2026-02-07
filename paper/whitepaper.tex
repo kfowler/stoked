@@ -44,7 +44,7 @@
 \definecolor{codecomment}{rgb}{0.4,0.4,0.4}
 \definecolor{codestring}{rgb}{0.6,0.1,0.1}
 
-\lstdefinelanguage{praxis}{
+\lstdefinelanguage{stoked}{
   keywords={type, channel, station, resource, arrival, process, let, in, if,
             then, else, match, rec, prompt, compute, human, acquire, release,
             assert, delay, pchoice, monitor, when, skip, stop, nu, servers,
@@ -69,10 +69,10 @@
   showstringspaces=false,
   tabsize=2,
 }
-\lstset{language=praxis}
+\lstset{language=stoked}
 
 % ── Macros ────────────────────────────────────────────────────────────────────
-\newcommand{\praxis}{\textsc{Praxis}}
+\newcommand{\stoked}{\textsc{Stoked}}
 \newcommand{\sem}[1]{\llbracket #1 \rrbracket}
 \newcommand{\qext}[1]{\mathcal{Q}(#1)}
 \newcommand{\scv}{c^2}
@@ -82,13 +82,13 @@
 % ══════════════════════════════════════════════════════════════════════════════
 \title{%
   \vspace{-1cm}
-  \textbf{\praxis: Process Algebra for eXtensible Industrial Systems}\\[6pt]
+  \textbf{\stoked: Stochastic Typed Operations Kit for Engineering Delivery}\\[6pt]
   \large A Formal Specification Language for Prompt-Based Production Systems\\
   with Dual Petri Net and Queueing Semantics
 }
 
 \author{%
-  \textsc{The Praxis Project}
+  \textsc{The Stoked Project}
 }
 
 \date{February 2026 \quad---\quad Version 0.1.0 (Draft)}
@@ -100,8 +100,8 @@
 
 % ── Abstract ──────────────────────────────────────────────────────────────────
 \begin{abstract}
-We introduce \praxis{} (\textbf{P}rocess \textbf{A}lgebra for e\textbf{X}tensible \textbf{I}ndustrial \textbf{S}ystems), a formal specification language for describing production systems in which workstations are LLM-based agents, deterministic computations, or human task queues, and jobs are software artifacts flowing through a queueing network.
-\praxis{} provides a unified formal model: every program has both a \emph{control-flow} interpretation via Coloured Generalized Stochastic Petri Nets~\cite{marsan1995modelling,jensen2009coloured} and a \emph{performance} interpretation via queueing network extraction~\cite{bolch2006queueing}.
+We introduce \stoked{} (\textbf{P}rocess \textbf{A}lgebra for e\textbf{X}tensible \textbf{I}ndustrial \textbf{S}ystems), a formal specification language for describing production systems in which workstations are LLM-based agents, deterministic computations, or human task queues, and jobs are software artifacts flowing through a queueing network.
+\stoked{} provides a unified formal model: every program has both a \emph{control-flow} interpretation via Coloured Generalized Stochastic Petri Nets~\cite{marsan1995modelling,jensen2009coloured} and a \emph{performance} interpretation via queueing network extraction~\cite{bolch2006queueing}.
 The language inherits compositional reasoning from CSP~\cite{hoare1985communicating} and the $\pi$-calculus~\cite{milner1999communicating}, while its performance semantics draws on Jackson networks~\cite{jackson1957networks}, the BCMP theorem~\cite{baskett1975open}, and the VUT equation from Factory Physics~\cite{hopp2011factory}.
 We present the complete abstract syntax, type system, operational semantics, dual denotational translations, well-formedness conditions, and three worked examples drawn from the software lifecycle.
 \end{abstract}
@@ -122,7 +122,7 @@ Agent orchestration frameworks describe \emph{what} to do but not \emph{how fast
 Workflow engines capture sequencing but ignore queueing effects.
 DevOps pipelines are operationally concrete but analytically opaque.
 
-\praxis{} bridges this gap.  It is a formal specification language for compiling high-level descriptions of productive processes into graphs of prompt-based processes for developing, deploying, monitoring, and maintaining distributed software systems.  Crucially, \praxis{} is \emph{not} a generic agent orchestration DSL.  It is a \textbf{production system specification language} grounded in ORIE, where:
+\stoked{} bridges this gap.  It is a formal specification language for compiling high-level descriptions of productive processes into graphs of prompt-based processes for developing, deploying, monitoring, and maintaining distributed software systems.  Crucially, \stoked{} is \emph{not} a generic agent orchestration DSL.  It is a \textbf{production system specification language} grounded in ORIE, where:
 \begin{itemize}
   \item \textbf{Workstations} are prompt-based LLM agents, deterministic compute steps, or human task queues.
   \item \textbf{Jobs} are software artifacts.
@@ -131,11 +131,11 @@ DevOps pipelines are operationally concrete but analytically opaque.
 
 \subsection{Design Principles}
 
-\praxis{} rests on five principles:
+\stoked{} rests on five principles:
 
 \begin{enumerate}
   \item \textbf{Dual semantics by construction.}
-    Every \praxis{} program has both a control-flow interpretation (what can happen) via Coloured Generalized Stochastic Petri Nets~\cite{marsan1995modelling}, and a performance interpretation (how fast it happens) via queueing network extraction.
+    Every \stoked{} program has both a control-flow interpretation (what can happen) via Coloured Generalized Stochastic Petri Nets~\cite{marsan1995modelling}, and a performance interpretation (how fast it happens) via queueing network extraction.
     These are not separate models glued together; they arise from a single unified formal model.
 
   \item \textbf{Stochastic from day one.}
@@ -144,7 +144,7 @@ DevOps pipelines are operationally concrete but analytically opaque.
     The Squared Coefficient of Variation ($\scv = \mathrm{Var}/\mathrm{Mean}^2$) links the language's stochastic specifications directly to queueing performance via the VUT equation~\cite{hopp2011factory,kingman1961single}.
 
   \item \textbf{Process-algebraic composition.}
-    \praxis{} inherits the compositional reasoning power of CSP~\cite{hoare1985communicating,roscoe1997theory} and the $\pi$-calculus~\cite{milner1992calculus,milner1999communicating,sangiorgi2001pi}.
+    \stoked{} inherits the compositional reasoning power of CSP~\cite{hoare1985communicating,roscoe1997theory} and the $\pi$-calculus~\cite{milner1992calculus,milner1999communicating,sangiorgi2001pi}.
     Systems are built from primitive processes using sequential, parallel, choice, restriction, and replication operators.
     Every operator has a precise Petri net translation and queueing interpretation.
 
@@ -152,7 +152,7 @@ DevOps pipelines are operationally concrete but analytically opaque.
     The language provides first-class constructs for Factory Physics~\cite{hopp2011factory} concepts: stations with service disciplines, finite resources (WIP caps, Kanban), arrival processes, routing policies, batch processing, rework loops, and performance assertions.
 
   \item \textbf{Specification, not implementation.}
-    \praxis{} defines syntax, type system, and formal semantics.
+    \stoked{} defines syntax, type system, and formal semantics.
     Conforming implementations may target simulation, analytical solvers, model checkers, or direct execution.
 \end{enumerate}
 
@@ -188,14 +188,14 @@ The full specification (12 chapters, ${\sim}4{,}600$ lines) accompanies this pap
 
 \subsection{Process Algebra}
 
-\praxis{} draws on two traditions of process algebra.
+\stoked{} draws on two traditions of process algebra.
 
 \textbf{CSP} (Communicating Sequential Processes)~\cite{hoare1985communicating,roscoe1997theory} provides the alphabetized model of synchronization, external and internal choice operators, and the trace/failures/divergences semantic hierarchy.
 A CSP process communicates with its environment through named events; parallel composition synchronizes on shared alphabets.
 
 The \textbf{$\pi$-calculus}~\cite{milner1992calculus,milner1999communicating,sangiorgi2001pi} extends this with \emph{name mobility}: channels are first-class values that can be communicated over other channels.
 The restriction operator $(\nu\, a)P$ creates fresh private channels, and replication $!P$ models persistent servers.
-\praxis{} adopts typed channels from the $\pi$-calculus with asymmetric send/receive, and restriction for scope control.
+\stoked{} adopts typed channels from the $\pi$-calculus with asymmetric send/receive, and restriction for scope control.
 
 \subsection{Petri Nets}
 
@@ -203,12 +203,12 @@ Petri nets~\cite{petri1962kommunikation,murata1989petri,reisig2013understanding}
 A Petri net $(P, T, F, W, M_0)$ consists of places $P$, transitions $T$, a flow relation $F$, arc weights $W$, and an initial marking $M_0$.
 The theory provides powerful structural analysis: \emph{P-invariants} for conservation, \emph{T-invariants} for repeatability, \emph{siphons} and \emph{traps} for deadlock analysis.
 
-\praxis{} targets \emph{Coloured Generalized Stochastic Petri Nets} (CGSPNs)~\cite{marsan1995modelling,jensen2009coloured}, which extend the basic model with token colors (types), guards, arc expressions, and stochastic firing delays.
+\stoked{} targets \emph{Coloured Generalized Stochastic Petri Nets} (CGSPNs)~\cite{marsan1995modelling,jensen2009coloured}, which extend the basic model with token colors (types), guards, arc expressions, and stochastic firing delays.
 Channels map to places, stations map to transition subnets, and composition operators map to net composition operations.
 
 \subsection{Queueing Theory}
 
-The queueing-theoretic grounding of \praxis{} draws on four pillars:
+The queueing-theoretic grounding of \stoked{} draws on four pillars:
 
 \textbf{Jackson networks}~\cite{jackson1957networks}: Open networks of $M/M/c$ queues with Poisson arrivals and exponential service admit product-form steady-state solutions, enabling efficient analytical computation.
 
@@ -222,7 +222,7 @@ It holds for \emph{any} stable system regardless of distributional assumptions.
   W_q \;\approx\; \underbrace{\left(\frac{\scv_a + \scv_s}{2}\right)}_{\text{Variability}} \;\cdot\; \underbrace{\frac{\rho^{\sqrt{2(c+1)}}}{1 - \rho}}_{\text{Utilization}} \;\cdot\; \underbrace{E[S]}_{\text{Time}}
 \end{equation}
 where $\scv_a$ and $\scv_s$ are the squared coefficients of variation of inter-arrival and service times, $\rho = \lambda/(c\mu)$ is utilization, and $E[S]$ is mean service time.
-This connects distribution parameters directly to performance, which is why \praxis{} makes distributions first-class.
+This connects distribution parameters directly to performance, which is why \stoked{} makes distributions first-class.
 
 \subsection{Factory Physics}
 
@@ -244,7 +244,7 @@ Here we highlight the key design decisions.
 
 \subsection{Five Primitive Declarations}
 
-\praxis{} has exactly five top-level declaration forms, each corresponding to an ORIE concept, a Petri net element, and a queueing-theoretic entity:
+\stoked{} has exactly five top-level declaration forms, each corresponding to an ORIE concept, a Petri net element, and a queueing-theoretic entity:
 
 \begin{table}[H]
 \centering
@@ -317,7 +317,7 @@ The SCV is the key link to queueing performance via Equation~\ref{eq:vut}.
 \section{Type System}
 \label{sec:types}
 
-\praxis{} has a kind system classifying types into \texttt{Type} (values), \texttt{Dist} (distributions), \texttt{Proc} (processes), \texttt{Chan} (channels), and \texttt{Res} (resources).
+\stoked{} has a kind system classifying types into \texttt{Type} (values), \texttt{Dist} (distributions), \texttt{Proc} (processes), \texttt{Chan} (channels), and \texttt{Res} (resources).
 
 The type universe has four layers: base types (Bool, Int, Float, String, Unit, Duration, Rate), composite types (records, variants, lists, sets, maps, tuples, options), domain-specific types (Chan$\langle T\rangle$, Dist$\langle T\rangle$, Resource$\langle n\rangle$), and the process type \texttt{proc}.
 
@@ -357,7 +357,7 @@ For general distributions, it induces a Generalized Semi-Markov Process (GSMP) w
 \section{Petri Net Semantics}
 \label{sec:petri}
 
-The translation function $\sem{\cdot}$ maps \praxis{} programs to Coloured Generalized Stochastic Petri Nets (CGSPNs)~\cite{marsan1995modelling}.
+The translation function $\sem{\cdot}$ maps \stoked{} programs to Coloured Generalized Stochastic Petri Nets (CGSPNs)~\cite{marsan1995modelling}.
 
 \subsection{Translation Scheme}
 
@@ -373,7 +373,7 @@ The key correspondences are:
 \subsection{Behavioral Equivalence}
 
 \begin{theorem}[Behavioral Equivalence]
-For every well-typed \praxis{} process $P$:
+For every well-typed \stoked{} process $P$:
 \[
   \text{traces}(\text{SOS}(P)) = \text{traces}(\text{PN}(\sem{P}))
 \]
@@ -390,7 +390,7 @@ Siphons and traps provide sufficient conditions for deadlock-freedom checkable i
 \section{Queueing Semantics}
 \label{sec:queueing}
 
-The extraction function $\qext{\cdot}$ maps \praxis{} systems to queueing network models.
+The extraction function $\qext{\cdot}$ maps \stoked{} systems to queueing network models.
 
 \subsection{Station Classification}
 
@@ -400,7 +400,7 @@ Each station is classified by the BCMP theorem~\cite{baskett1975open} into one o
 \centering
 \begin{tabular}{@{}llll@{}}
 \toprule
-\textbf{BCMP Type} & \textbf{Discipline} & \textbf{Service} & \textbf{\praxis{} Config} \\
+\textbf{BCMP Type} & \textbf{Discipline} & \textbf{Service} & \textbf{\stoked{} Config} \\
 \midrule
 Type 1 & FCFS   & Exponential     & \lstinline|fifo|, \lstinline|Exponential| \\
 Type 2 & PS     & General         & \lstinline|ps| \\
@@ -414,7 +414,7 @@ Type 4 & LCFS-PR & General        & \lstinline|lifo|, preemptive \\
 
 \subsection{Analysis Methods}
 
-\praxis{} supports three analysis regimes:
+\stoked{} supports three analysis regimes:
 \begin{enumerate}
   \item \textbf{Jackson networks}~\cite{jackson1957networks} for open networks with Poisson arrivals and exponential service.
   \item \textbf{Mean Value Analysis}~\cite{reiser1980mean} for closed networks.
@@ -438,7 +438,7 @@ assert littles_law(System)
 \section{Well-Formedness Conditions}
 \label{sec:wellformed}
 
-A \praxis{} system is \emph{well-formed} if it satisfies eight conditions:
+A \stoked{} system is \emph{well-formed} if it satisfies eight conditions:
 
 \begin{table}[H]
 \centering
@@ -500,26 +500,26 @@ Critical WIP $W_0 \approx 3$ features; actual expected WIP $\approx 3$--$5$, wel
 Stochastic extensions of process algebras have been explored extensively.
 PEPA (Performance Evaluation Process Algebra)~\cite{hillston1996compositional} associates rates with activities, yielding a CTMC.
 Stochastic $\pi$-calculus variants~\cite{priami1995stochastic} add rates to the $\pi$-calculus.
-\praxis{} differs by targeting the full generality of GI/G/c queueing (not just exponential/CTMC), by providing first-class ORIE abstractions (stations, WIP limits, rework), and by maintaining a dual Petri net structure for analysis.
+\stoked{} differs by targeting the full generality of GI/G/c queueing (not just exponential/CTMC), by providing first-class ORIE abstractions (stations, WIP limits, rework), and by maintaining a dual Petri net structure for analysis.
 
 \textbf{Workflow and orchestration languages.}
 BPMN, YAWL, and temporal workflow specifications describe business processes but lack queueing semantics.
-\praxis{} occupies a different niche: it is a \emph{formal specification} language, not an executable workflow engine.
+\stoked{} occupies a different niche: it is a \emph{formal specification} language, not an executable workflow engine.
 
 \textbf{Queueing network tools.}
 Tools like LQNS, JINQS, and the JMT suite~\cite{bolch2006queueing} solve queueing network models but are not compositional specification languages.
-\praxis{} provides a language-level abstraction that \emph{generates} the queueing models to be solved.
+\stoked{} provides a language-level abstraction that \emph{generates} the queueing models to be solved.
 
 \textbf{Petri nets for software processes.}
 The use of Petri nets for modeling software processes dates to~\cite{kellner1999software}.
-\praxis{} contributes a \emph{typed, compositional} process algebra whose Petri net translation preserves behavioral equivalence.
+\stoked{} contributes a \emph{typed, compositional} process algebra whose Petri net translation preserves behavioral equivalence.
 
 
 % ══════════════════════════════════════════════════════════════════════════════
 \section{Conclusion and Future Work}
 \label{sec:conclusion}
 
-We have presented \praxis{}, a formal specification language for prompt-based production systems with dual Petri net and queueing semantics.
+We have presented \stoked{}, a formal specification language for prompt-based production systems with dual Petri net and queueing semantics.
 The language's five primitive declarations, process-algebraic operators, and first-class distributions provide a compositional framework for specifying, analyzing, and reasoning about the performance of modern software delivery systems.
 
 \textbf{Future directions} include:

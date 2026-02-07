@@ -1,14 +1,14 @@
-# PRAXIS Language Specification
+# STOKED Language Specification
 
 ## Chapter 5 — Operational Semantics
 
 ---
 
-This chapter defines the operational semantics of PRAXIS as a labeled transition system (LTS). The semantics is given in the structural operational semantics (SOS) style, following Plotkin's approach. We define configurations, labels, structural congruence, and reduction rules for all process constructors defined in §3.5.
+This chapter defines the operational semantics of STOKED as a labeled transition system (LTS). The semantics is given in the structural operational semantics (SOS) style, following Plotkin's approach. We define configurations, labels, structural congruence, and reduction rules for all process constructors defined in §3.5.
 
 ## 5.1 Configurations
 
-A *configuration* represents the global state of a PRAXIS system at a point in time.
+A *configuration* represents the global state of a STOKED system at a point in time.
 
 **Definition 5.1 (Configuration).** A configuration is a tuple:
 

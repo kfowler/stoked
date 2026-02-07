@@ -1,10 +1,10 @@
-# PRAXIS Language Specification
+# STOKED Language Specification
 
 ## Appendix B — Equivalences and Algebraic Laws
 
 ---
 
-This appendix defines the equivalence relations and algebraic laws for PRAXIS processes. These relations support compositional reasoning: verifying properties of a system by reasoning about its components.
+This appendix defines the equivalence relations and algebraic laws for STOKED processes. These relations support compositional reasoning: verifying properties of a system by reasoning about its components.
 
 ## B.1 Trace Equivalence
 
@@ -81,7 +81,7 @@ Strong bisimilarity implies weak bisimilarity implies trace equivalence. The con
 
 ## B.3 Performance Equivalence
 
-PRAXIS introduces a notion of equivalence specific to its queueing semantics.
+STOKED introduces a notion of equivalence specific to its queueing semantics.
 
 **Definition B.9 (Performance Equivalence).** Two processes P and Q are *performance-equivalent*, written P ≡_perf Q, if:
 
@@ -112,7 +112,7 @@ This captures the notion that Q is "at least as good" as P in performance terms.
 
 ## B.4 Algebraic Laws
 
-The following algebraic laws hold for PRAXIS processes. Each law states an equivalence (strong bisimilarity ~, weak bisimilarity ≈, or trace equivalence =_T) between process expressions.
+The following algebraic laws hold for STOKED processes. Each law states an equivalence (strong bisimilarity ~, weak bisimilarity ≈, or trace equivalence =_T) between process expressions.
 
 ### B.4.1 Laws of Sequential Composition
 
@@ -220,7 +220,7 @@ For alphabetized parallel, the expansion law decomposes synchronization:
 
 ## B.5 Congruence Properties
 
-**Theorem B.2.** Strong bisimilarity (~) is a congruence for all PRAXIS operators:
+**Theorem B.2.** Strong bisimilarity (~) is a congruence for all STOKED operators:
 
 ```
 If P ~ P', then:
@@ -237,13 +237,13 @@ If P ~ P', then:
 
 **Proof sketch.** For each operator, the bisimulation relation is constructed by pairing corresponding configurations. The key insight is that each operator's semantics is defined compositionally (the transitions of the composite depend only on the transitions of the components), so substituting bisimilar components preserves the bisimulation property. □
 
-**Theorem B.3.** Weak bisimilarity (≈) is a congruence for all PRAXIS operators except external choice ([]).
+**Theorem B.3.** Weak bisimilarity (≈) is a congruence for all STOKED operators except external choice ([]).
 
-**Remark.** The failure of weak bisimilarity to be a congruence for external choice is standard in process algebra (the "problem of the external choice"). PRAXIS inherits this from CSP. For external choice, trace-failures equivalence (not defined here) is the appropriate congruence.
+**Remark.** The failure of weak bisimilarity to be a congruence for external choice is standard in process algebra (the "problem of the external choice"). STOKED inherits this from CSP. For external choice, trace-failures equivalence (not defined here) is the appropriate congruence.
 
 **Theorem B.4.** Performance equivalence (≡_perf) is a congruence for sequential composition, parallel composition, and choice operators (where the queueing network structure is preserved).
 
-## B.6 Derived Laws for PRAXIS Patterns
+## B.6 Derived Laws for STOKED Patterns
 
 ### B.6.1 Pipeline Absorption
 
@@ -281,7 +281,7 @@ KanbanStation(W, D) with c servers
 
 ## B.7 Fairness
 
-**Definition B.11 (Fair Execution).** An execution of a PRAXIS system is *fair* if every continuously enabled transition eventually fires.
+**Definition B.11 (Fair Execution).** An execution of a STOKED system is *fair* if every continuously enabled transition eventually fires.
 
 **Theorem B.5 (Fairness under Stochastic Semantics).** Under the stochastic operational semantics (§5.6) with continuous distributions, every execution is almost surely fair — every continuously enabled transition fires with probability 1.
 

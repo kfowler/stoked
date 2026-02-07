@@ -1,10 +1,10 @@
-# PRAXIS Language Specification
+# STOKED Language Specification
 
 ## Chapter 10 — Examples
 
 ---
 
-This chapter presents three complete, worked examples that demonstrate the full PRAXIS language across the software lifecycle domain. Each example includes type declarations, channel/station definitions, process definitions, performance assertions, and analysis.
+This chapter presents three complete, worked examples that demonstrate the full STOKED language across the software lifecycle domain. Each example includes type declarations, channel/station definitions, process definitions, performance assertions, and analysis.
 
 ---
 
@@ -16,7 +16,7 @@ A software team processes pull requests through: automated build → code review
 
 ### 10.1.2 Type Declarations
 
-```praxis
+```stoked
 module Examples.CICD
 
 type PRStatus = Pending | Building | InReview | Testing | Deploying | Done | Failed
@@ -62,7 +62,7 @@ type DeployResult = {
 
 ### 10.1.3 Channel Declarations
 
-```praxis
+```stoked
 channel pr_queue     : Chan<PullRequest>
 channel build_queue  : Chan<PullRequest>
 channel review_queue : Chan<BuildResult>
@@ -74,7 +74,7 @@ channel rework_queue : Chan<ReviewResult>    // rework loop back to build
 
 ### 10.1.4 Resource Declarations
 
-```praxis
+```stoked
 resource build_agents   : Resource<4>     // 4 parallel build agents
 resource review_capacity: Resource<3>     // 3 concurrent reviewers
 resource deploy_slots   : Resource<1>     // 1 deployment slot (serialized)
@@ -85,7 +85,7 @@ process TechLead = review_queue ? pr ; CodeReview(pr) ; skip
 
 ### 10.1.5 Station Declarations
 
-```praxis
+```stoked
 station BuildServer : build_queue -> review_queue {
   servers: 4
   discipline: fifo
@@ -145,7 +145,7 @@ station ReworkStation : rework_queue -> build_queue {
 
 ### 10.1.6 Arrival Declaration
 
-```praxis
+```stoked
 arrival PRArrivals : {
   channel: pr_queue
   distribution: Exponential(10/d)            // 10 PRs per day, Poisson arrival
@@ -156,7 +156,7 @@ arrival PRArrivals : {
 
 ### 10.1.7 Process Definition
 
-```praxis
+```stoked
 process CICDPipeline =
   // Main pipeline with rework loop
   (nu internal_build : Chan<PullRequest>)
@@ -199,7 +199,7 @@ process CICDPipeline =
 
 ### 10.1.8 Performance Assertions
 
-```praxis
+```stoked
 // Throughput: at least 9.5/day (95% of arrival rate, accounting for scrap)
 assert throughput(CICDPipeline) >= 9.5/d
 
@@ -272,7 +272,7 @@ An incident response system receives alerts, triages them by severity, and route
 
 ### 10.2.2 Declarations
 
-```praxis
+```stoked
 module Examples.IncidentResponse
 
 type Severity = Critical | Warning | Info
@@ -328,7 +328,7 @@ process IncidentCommander = critical_queue ? triaged ;
 
 ### 10.2.3 Stations
 
-```praxis
+```stoked
 station AlertTriage : triage_queue -> (critical_queue, warning_queue, info_queue) {
   servers: 2
   discipline: priority
@@ -397,7 +397,7 @@ station InfoLogger : info_queue -> resolved_queue {
 
 ### 10.2.4 Arrival
 
-```praxis
+```stoked
 arrival AlertStream : {
   channel: alert_stream
   distribution: Exponential(100/d)           // 100 alerts per day
@@ -408,7 +408,7 @@ arrival AlertStream : {
 
 ### 10.2.5 Process Definition
 
-```praxis
+```stoked
 process IncidentResponseSystem =
   (
     // Ingest alerts
@@ -458,7 +458,7 @@ process IncidentResponseSystem =
 
 ### 10.2.6 SPC Monitoring
 
-```praxis
+```stoked
 monitor(CriticalResponse) {
   when cycle_time > 15m =>
     escalation_queue ! current_incident,
@@ -477,7 +477,7 @@ monitor(CriticalResponse) {
 
 ### 10.2.7 Performance Assertions
 
-```praxis
+```stoked
 // Critical alert response time
 assert cycle_time(CriticalResponse).p99 <= 15m
 
@@ -529,7 +529,7 @@ A product organization with three teams (Frontend, Backend, Platform) delivers f
 
 ### 10.3.2 Declarations
 
-```praxis
+```stoked
 module Examples.KanbanDelivery
 
 type FeatureSize = Small | Medium | Large
@@ -592,7 +592,7 @@ resource release_limit       : Resource<1>
 
 ### 10.3.3 Stations
 
-```praxis
+```stoked
 // Product manager decomposes features into tasks
 station FeatureDecomposition : ready_for_dev -> (frontend_wip, backend_wip, platform_wip) {
   servers: 1
@@ -702,7 +702,7 @@ station ReleaseDeploy : release_queue -> delivered {
 
 ### 10.3.4 Arrival
 
-```praxis
+```stoked
 arrival FeatureRequests : {
   channel: backlog
   distribution: Exponential(3/w)              // 3 features per week
@@ -713,7 +713,7 @@ arrival FeatureRequests : {
 
 ### 10.3.5 Process Definition
 
-```praxis
+```stoked
 process KanbanSystem =
   (
     // Pull from backlog to ready (respecting WIP)
@@ -791,7 +791,7 @@ process KanbanSystem =
 
 ### 10.3.6 Performance Assertions
 
-```praxis
+```stoked
 // Feature delivery rate
 assert throughput(KanbanSystem) >= 2/w
 

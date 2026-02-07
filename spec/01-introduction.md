@@ -1,4 +1,4 @@
-# PRAXIS Language Specification
+# STOKED Language Specification
 
 ## Part I: Foundations
 
@@ -15,9 +15,9 @@ Modern distributed software systems are production systems in the Operations Res
 
 Yet the tools used to specify, analyze, and orchestrate these systems lack the formal foundation that manufacturing and logistics have enjoyed for decades. Agent orchestration frameworks describe *what* to do but not *how fast* or *how reliably*. Workflow engines capture sequencing but ignore queueing effects. DevOps pipelines are operationally concrete but analytically opaque.
 
-**PRAXIS** — **P**rocess **A**lgebra for e**X**tensible **I**ndustrial **S**ystems — bridges this gap. It is a formal specification language for compiling high-level descriptions of productive processes into graphs of prompt-based processes for developing, deploying, monitoring, and maintaining distributed software systems.
+**STOKED** — **S**tochastic **T**yped **O**perations **K**it for **E**ngineering **D**elivery — bridges this gap. It is a formal specification language for compiling high-level descriptions of productive processes into graphs of prompt-based processes for developing, deploying, monitoring, and maintaining distributed software systems.
 
-PRAXIS is *not* a generic agent orchestration DSL. It is a **production system specification language** grounded in ORIE, where:
+STOKED is *not* a generic agent orchestration DSL. It is a **production system specification language** grounded in ORIE, where:
 
 - **Workstations** are prompt-based LLM agents, deterministic compute steps, or human task queues.
 - **Jobs** are software artifacts: pull requests, test reports, deployment manifests, incident tickets.
@@ -25,48 +25,48 @@ PRAXIS is *not* a generic agent orchestration DSL. It is a **production system s
 
 ## 1.2 Design Philosophy
 
-PRAXIS rests on five principles:
+STOKED rests on five principles:
 
-1. **Dual semantics by construction.** Every PRAXIS program has both a *control-flow* interpretation (what can happen) via Coloured Generalized Stochastic Petri Nets, and a *performance* interpretation (how fast it happens) via queueing network extraction. These are not separate models glued together; they arise from a single unified formal model.
+1. **Dual semantics by construction.** Every STOKED program has both a *control-flow* interpretation (what can happen) via Coloured Generalized Stochastic Petri Nets, and a *performance* interpretation (how fast it happens) via queueing network extraction. These are not separate models glued together; they arise from a single unified formal model.
 
 2. **Stochastic from day one.** Variability is not an afterthought. Arrival processes, service times, yield rates, and routing probabilities are first-class language constructs with distribution types. The Squared Coefficient of Variation (SCV, c² = Var/Mean²) links the language's stochastic specifications directly to queueing performance via the VUT equation.
 
-3. **Process-algebraic composition.** PRAXIS inherits the compositional reasoning power of CSP and the pi-calculus. Systems are built from primitive processes using sequential composition, parallel composition (synchronized, interleaved, and alphabetized), choice (external, internal, probabilistic), channel communication (asynchronous and synchronous), restriction, and replication. Every operator has a precise Petri net translation and queueing interpretation.
+3. **Process-algebraic composition.** STOKED inherits the compositional reasoning power of CSP and the pi-calculus. Systems are built from primitive processes using sequential composition, parallel composition (synchronized, interleaved, and alphabetized), choice (external, internal, probabilistic), channel communication (asynchronous and synchronous), restriction, and replication. Every operator has a precise Petri net translation and queueing interpretation.
 
 4. **ORIE-native abstractions.** The language provides first-class constructs for concepts from Factory Physics and queueing theory: stations with service disciplines, finite resources (WIP caps, Kanban), arrival processes, routing policies, batch processing, rework loops, and performance assertions (throughput, cycle time, utilization, WIP bounds, Little's Law, bottleneck identification).
 
-5. **Specification, not implementation.** PRAXIS is a specification language. This document defines its syntax, type system, and formal semantics. It does not prescribe a runtime, compiler, or execution engine. Conforming implementations may target simulation, analytical solvers, model checkers, or direct execution — provided they respect the semantics defined herein.
+5. **Specification, not implementation.** STOKED is a specification language. This document defines its syntax, type system, and formal semantics. It does not prescribe a runtime, compiler, or execution engine. Conforming implementations may target simulation, analytical solvers, model checkers, or direct execution — provided they respect the semantics defined herein.
 
 ## 1.3 Relationship to Existing Formalisms
 
 ### 1.3.1 CSP (Communicating Sequential Processes)
 
-PRAXIS adopts CSP's process-algebraic style: named processes, sequential and parallel composition, external and internal choice, channel-based communication, and algebraic laws for reasoning about equivalence. From CSP, PRAXIS inherits:
+STOKED adopts CSP's process-algebraic style: named processes, sequential and parallel composition, external and internal choice, channel-based communication, and algebraic laws for reasoning about equivalence. From CSP, STOKED inherits:
 
 - The alphabet model of synchronization (§5.4.6, Parallel Composition)
 - External choice (`[]`) and internal choice (`|~|`) operators
 - Traces, failures, and divergences as semantic domains (Appendix B)
 - Refinement as the primary notion of correctness
 
-PRAXIS extends CSP with:
+STOKED extends CSP with:
 - Probabilistic and stochastic choice (`pchoice`, distribution-valued delays)
 - Asymmetric send/receive on typed channels (from pi-calculus)
 - Resource semantics (finite shared resources with acquire/release)
 
 ### 1.3.2 Pi-Calculus
 
-From the pi-calculus, PRAXIS adopts:
+From the pi-calculus, STOKED adopts:
 
 - **Channel mobility**: channels are first-class values that can be sent over other channels
 - **Restriction** (`(nu a) P`): dynamic creation of fresh, private channels
 - **Replication** (`!P`): unbounded parallel copies
 - **Typed channels**: channels carry values of specified types
 
-PRAXIS does not adopt the full generality of higher-order pi-calculus (process passing). Channels carry *data*, not processes.
+STOKED does not adopt the full generality of higher-order pi-calculus (process passing). Channels carry *data*, not processes.
 
 ### 1.3.3 Petri Nets
 
-PRAXIS programs translate to Coloured Generalized Stochastic Petri Nets (CGSPNs), which provide:
+STOKED programs translate to Coloured Generalized Stochastic Petri Nets (CGSPNs), which provide:
 
 - **Structural analysis**: P-invariants for conservation (flow balance), T-invariants for repeatability, siphons and traps for deadlock analysis
 - **Reachability analysis**: boundedness, liveness, reversibility
@@ -76,7 +76,7 @@ The translation (§6) maps channels to places, stations to transition subnets, a
 
 ### 1.3.4 Queueing Theory
 
-PRAXIS programs yield queueing network models, drawing on:
+STOKED programs yield queueing network models, drawing on:
 
 - **Jackson networks**: open networks of M/M/c stations with product-form solutions
 - **BCMP theorem**: generalized product-form networks with multiple job classes, various service disciplines, and state-dependent routing
@@ -86,7 +86,7 @@ PRAXIS programs yield queueing network models, drawing on:
 
 ### 1.3.5 Factory Physics
 
-The ORIE grounding of PRAXIS draws directly on the laws of Factory Physics (Hopp & Spearman):
+The ORIE grounding of STOKED draws directly on the laws of Factory Physics (Hopp & Spearman):
 
 - **Little's Law**: WIP = Throughput × Cycle Time
 - **The VUT Equation**: CT_q = V × U × T (variability × utilization × natural process time)
@@ -133,7 +133,7 @@ This specification is organized in three parts with two appendices:
 
 See Chapter 2 for the complete notation guide. In brief:
 
-- `monospace` for PRAXIS syntax and keywords
+- `monospace` for STOKED syntax and keywords
 - *italic* for meta-variables and defined terms on first use
 - **bold** for emphasis and defined names
 - Mathematical notation (Γ, ⊢, →) for formal judgments

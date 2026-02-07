@@ -1,4 +1,4 @@
-# PRAXIS Language Specification
+# STOKED Language Specification
 
 ## Appendix A — Proof Sketches
 
@@ -108,7 +108,7 @@ The remaining cases ([R-SeqL], [R-ParL], [R-ParR], [R-ExtL], [R-IntL], [R-IntR],
 
 ## A.3 Behavioral Equivalence (Theorem 6.1)
 
-**Theorem 6.1 (Behavioral Equivalence).** For every well-typed PRAXIS process P:
+**Theorem 6.1 (Behavioral Equivalence).** For every well-typed STOKED process P:
 ```
 traces(SOS(P)) = traces(PN(⟦P⟧))
 ```
@@ -139,7 +139,7 @@ We show that R is a (weak) bisimulation:
 
 ## A.4 Conservation via P-Invariants (Theorem 6.2)
 
-**Theorem 6.2 (Conservation).** For every well-formed PRAXIS system S (satisfying WF-4), the translated net ⟦S⟧ has a positive P-invariant covering all places.
+**Theorem 6.2 (Conservation).** For every well-formed STOKED system S (satisfying WF-4), the translated net ⟦S⟧ has a positive P-invariant covering all places.
 
 **Proof sketch.** We construct the P-invariant explicitly.
 
@@ -160,7 +160,7 @@ These conditions are exactly the well-formedness conditions WF-4 and WF-5 (conse
 
 ## A.5 Stability Implies Finite Performance Metrics (Theorem 7.3 Prerequisite)
 
-**Proposition A.1.** If a PRAXIS system S satisfies WF-7 (stability), then all performance metrics (throughput, cycle time, WIP, utilization) are finite and well-defined.
+**Proposition A.1.** If a STOKED system S satisfies WF-7 (stability), then all performance metrics (throughput, cycle time, WIP, utilization) are finite and well-defined.
 
 **Proof sketch.** Stability (ρ(s) < 1 for all stations s) implies:
 
@@ -176,7 +176,7 @@ For Jackson/BCMP networks (§7.3, §7.4), these results are exact. For general n
 
 ## A.6 Little's Law Invariant
 
-**Theorem (Little's Law).** For any stable PRAXIS subsystem S: L = λ · W.
+**Theorem (Little's Law).** For any stable STOKED subsystem S: L = λ · W.
 
 **Proof sketch.** Little's Law is a general result that holds for *any* system in steady state, regardless of distribution assumptions, service discipline, or routing policy. The proof follows from:
 
