@@ -1,10 +1,9 @@
 \documentclass[11pt,a4paper]{article}
 
-% ── Fonts (XeLaTeX) ──────────────────────────────────────────────────────────
-\usepackage{fontspec}
-\setmainfont{Latin Modern Roman}
-\setsansfont{Latin Modern Sans}
-\setmonofont{Latin Modern Mono}
+% ── Fonts (pdfLaTeX) ─────────────────────────────────────────────────────────
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
 
 % ── Layout ────────────────────────────────────────────────────────────────────
 \usepackage[margin=1in]{geometry}
@@ -100,7 +99,7 @@
 
 % ── Abstract ──────────────────────────────────────────────────────────────────
 \begin{abstract}
-We introduce \stoked{} (\textbf{P}rocess \textbf{A}lgebra for e\textbf{X}tensible \textbf{I}ndustrial \textbf{S}ystems), a formal specification language for describing production systems in which workstations are LLM-based agents, deterministic computations, or human task queues, and jobs are software artifacts flowing through a queueing network.
+We introduce \stoked{} (\textbf{S}tochastic \textbf{T}yped \textbf{O}perations \textbf{K}it for \textbf{E}ngineering \textbf{D}elivery), a formal specification language for describing production systems in which workstations are LLM-based agents, deterministic computations, or human task queues, and jobs are software artifacts flowing through a queueing network.
 \stoked{} provides a unified formal model: every program has both a \emph{control-flow} interpretation via Coloured Generalized Stochastic Petri Nets~\cite{marsan1995modelling,jensen2009coloured} and a \emph{performance} interpretation via queueing network extraction~\cite{bolch2006queueing}.
 The language inherits compositional reasoning from CSP~\cite{hoare1985communicating} and the $\pi$-calculus~\cite{milner1999communicating}, while its performance semantics draws on Jackson networks~\cite{jackson1957networks}, the BCMP theorem~\cite{baskett1975open}, and the VUT equation from Factory Physics~\cite{hopp2011factory}.
 We present the complete abstract syntax, type system, operational semantics, dual denotational translations, well-formedness conditions, and three worked examples drawn from the software lifecycle.

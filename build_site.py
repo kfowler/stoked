@@ -254,7 +254,7 @@ BASE_TEMPLATE = Template(dedent("""\
       </div>
       {% endif %}
       <div class="footer">
-        STOKED Specification v0.1.0 &mdash; Process Algebra for eXtensible Industrial Systems
+        STOKED Specification v0.1.0 &mdash; Stochastic Typed Operations Kit for Engineering Delivery
       </div>
     </main>
   </div>
